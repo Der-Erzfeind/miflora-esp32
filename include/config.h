@@ -25,7 +25,7 @@ String FLORA_DEVICES[][11] = {
 #define WIFI_PASSWORD "7Hqlg9(oL29Wpg3;"        // Password of your WiFi network
 
 // Mqtt settings
-#define MQTT_HOST "192.168.0.56"                 // Mqtt broker ip address or hostname
+#define MQTT_HOST "192.168.0.78"                 // Mqtt broker ip address or hostname
 #define MQTT_PORT 1883                           // Mqqt port (default: 1883)
 #define MQTT_USERNAME "esp"                      // Mqtt username [optional]
 #define MQTT_PASSWORD ""                         // Mqtt username [optional]
