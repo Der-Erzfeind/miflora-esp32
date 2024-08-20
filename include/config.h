@@ -27,8 +27,8 @@ String FLORA_DEVICES[][11] = {
 // Mqtt settings
 #define MQTT_HOST "192.168.0.78"                 // Mqtt broker ip address or hostname
 #define MQTT_PORT 1883                           // Mqqt port (default: 1883)
-#define MQTT_USERNAME "esp"                      // Mqtt username [optional]
-#define MQTT_PASSWORD ""                         // Mqtt username [optional]
-#define MQTT_BASE_TOPIC "miflora"                // The Miflora base topic
+#define MQTT_USERNAME "esp1"                      // Mqtt username [optional]
+#define MQTT_PASSWORD "esp1"                         // Mqtt username [optional]
+#define MQTT_BASE_TOPIC "test"                // The Miflora base topic
 #define MQTT_RETRY_WAIT 5000                     // Retry delay between attempts to connect to the Mqtt broker
 #define MQTT_RETAIN false                        // Retain Mqtt messages (default: false)
