@@ -1,9 +1,17 @@
 #include <Arduino.h>
-#include <string.h>
+#include "ph_sensor.cpp"
 
-#define ARDUINO_PWR_PIN 6
-#define C_TIME_VOL 3
+#define PIN_ARDUINO_PWR 2
+#define CMD_PUMP1_LOW 10
+#define CMD_PUMP2_LOW 20
+#define CMD_PUMP3_LOW 30
+#define CMD_PUMP1_HIGH 11
+#define CMD_PUMP2_HIGH 21
+#define CMD_PUMP3_HIGH 31
+#define C_TIME_VOL 
 #define C_DIST_VOL 3
+#define C_PH_VOL 4
+
 
 typedef struct{
     int id;
@@ -12,7 +20,7 @@ typedef struct{
 }sensor_US;
 
 void emergency_shutdown(){
-    digitalWrite(ARDUINO_PWR_PIN, LOW);
+    digitalWrite(PIN_ARDUINO_PWR, LOW);
 }
 
 void init_US(sensor_US sensor) {
@@ -40,34 +48,42 @@ float read_US(sensor_US sensor) {
 }
 
 bool addWater(uint ml){
-    Serial.println("cmd_high_pump_1");
+    Serial.println("CMD_PUMP1_HIGH");
     while((read_US(us1)*C_DIST_VOL) < ml){delay(250);}
-    Serial.println("cmd_low_pump_1");
-    string response = Serial.read();
-    if (response != "low_pump_1"){
+    Serial.println("CMD_PUMP1_LOW");
+    String response = Serial.read();
+    if (response != "low_CMD_PUMP_1"){
         emergency_shutdown();
+        return false;
     }
     return true;
 }
 
 bool addFertilizer(uint ml){
-    Serial.println("cmd_high_pump_2");
+    Serial.println("CMD_PUMP2_HIGH");
     delay(ml*C_TIME_VOL);
-    Serial.println("cmd_low_pump_2");
-    string response = Serial.read();
-    if (response != "low_pump_1"){
+    Serial.println("CMD_PUMP2_LOW");
+    String response = Serial.read();
+    if (response != "low_CMD_PUMP_1"){
         emergency_shutdown();
+        return false;
     }
     return true;
 }
 
-bool checkPH(int ph){
-    Serial.println("cmd_high_pump_2");
-    delay(ml*C_TIME_VOL);
-    Serial.println("cmd_low_pump_2");
-    string response = Serial.read();
-    if (response != "low_pump_1"){
-        emergency_shutdown();
+bool checkPH(float ph){
+    int ml = ph * C_PH_VOL;
+    float curr_ph;
+    while(1){
+        Serial.println("CMD_PUMP3_HIGH");
+        delay(ml*C_TIME_VOL);
+        Serial.println("CMD_PUMP3_LOW");
+        String response = Serial.read();
+        if (response != "low_CMD_PUMP_1"){
+            emergency_shutdown();
+            return false;
+        }
+        curr_ph = read_PH();
     }
     return true;
 }
