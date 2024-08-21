@@ -6,7 +6,7 @@
 #include "PubSubClient.h"
 #include "config.h"
 #include "Sensor.h"
-#include "control.cpp"
+#include "control.h"
 
 /**
    A BLE client for the Xiaomi Mi Plant Sensor, pushing measurements to an MQTT server.
@@ -434,16 +434,34 @@ void setup()
   // create a hibernate task in case something gets stuck
   xTaskCreate(delayedHibernate, "hibernate", 4096, NULL, 1, &hibernateTaskHandle);
 
-  Serial.println("Initialize BLE client...");
-  BLEDevice::init("");
-  BLEDevice::setPower(ESP_PWR_LVL_P9);
-
   // create device Json Document
   DynamicJsonDocument deviceJson(deviceCapacity);
 
   // connecting wifi and mqtt server
   connectWifi(deviceJson);
   connectMqtt();
+
+  String t_control = 
+
+  client.publish("control", "payload", MQTT_RETAIN);    //request for sensor parameters
+
+  for (int i = 0; i < deviceCount; i++){
+    FLORA_DEVICES[i][0];
+    FLORA_DEVICES[i][1];
+    FLORA_DEVICES[i][2];
+    FLORA_DEVICES[i][3].toInt();
+    FLORA_DEVICES[i][4].toInt();
+    FLORA_DEVICES[i][5].toInt();
+    FLORA_DEVICES[i][6].toInt();
+    FLORA_DEVICES[i][7].toInt();
+    FLORA_DEVICES[i][8].toInt();
+    FLORA_DEVICES[i][9].toInt();
+    FLORA_DEVICES[i][10].toInt();
+  }
+
+  Serial.println("Initialize BLE client...");
+  BLEDevice::init("");
+  BLEDevice::setPower(ESP_PWR_LVL_P9);
 
   // publish device status
   char payload[deviceCapacity];
