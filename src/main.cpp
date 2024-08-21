@@ -6,6 +6,7 @@
 #include "PubSubClient.h"
 #include "config.h"
 #include "Sensor.h"
+#include "control.cpp"
 
 /**
    A BLE client for the Xiaomi Mi Plant Sensor, pushing measurements to an MQTT server.

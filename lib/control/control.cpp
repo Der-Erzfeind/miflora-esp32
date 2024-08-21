@@ -1,30 +1,4 @@
-#include <Arduino.h>
-#include "ph_sensor.cpp"
-
-#define PIN_ARDUINO_PWR 2
-#define PIN_US1_TRIGGER 1
-#define PIN_US1_ECHO 1
-#define PIN_US2_TRIGGER 1
-#define PIN_US2_ECHO 1
-
-#define CMD_PUMP1_OFF 010
-#define CMD_PUMP2_OFF 020
-#define CMD_PUMP3_OFF 030
-#define CMD_PUMP1_ON 011
-#define CMD_PUMP2_ON 021
-#define CMD_PUMP3_ON 031
-
-#define ACK_PUMP1_OFF 110
-#define ACK_PUMP2_OFF 120
-#define ACK_PUMP3_OFF 130
-#define ACK_PUMP1_ON 111
-#define ACK_PUMP2_ON 121
-#define ACK_PUMP3_ON 131
-
-#define C_TIME_VOL 6
-#define C_DIST_VOL 3
-#define C_PH_VOL 4
-
+#include "control.h"
 
 void emergency_shutdown(){
     digitalWrite(PIN_ARDUINO_PWR, LOW);
