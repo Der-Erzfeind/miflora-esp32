@@ -35,7 +35,7 @@ void init_PH()
   analogReadResolution(12); // Set ADC resolution to 12 bits
 }
 
-void read_PH()
+float read_PH()
 {
 
   for(int i=0;i<9;i++)
@@ -53,5 +53,7 @@ void read_PH()
 //   pH = 7 + (voltage-1.5)*(4-7)/(1.7-1.5);
   
   pH = (0.07 * 7 - voltage + 1.5)/0.07;
+
+  return pH;
 }
 
