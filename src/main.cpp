@@ -58,11 +58,17 @@ static const String deviceBaseTopic = String(MQTT_BASE_TOPIC) + "/" + String(DEV
 // the base sensor topic
 static const String sensorBaseTopic = String(MQTT_BASE_TOPIC) + "/" + String(DEVICE_ID) + "/sensor";
 
+static const String espControlTopic = String(MQTT_BASE_TOPIC) + "/" + String(DEVICE_ID) + "/control/esp";
+
+static const String raspControlTopic = String(MQTT_BASE_TOPIC) + "/" + String(DEVICE_ID) + "/control/raspberry";
+
 // the capacity of the device json document
 static const size_t deviceCapacity = JSON_OBJECT_SIZE(5) + 80;
 
 // the capacity of the sensor json document
 static const size_t sensorCapacity = JSON_OBJECT_SIZE(16) + 230;
+
+static const size_t commandCapacity = 200;
 
 // boot count used to check if battery status should be read
 RTC_DATA_ATTR int bootCount = 0;
@@ -415,11 +421,69 @@ void hibernate()
   esp_deep_sleep_start();
 }
 
+void hibernateAfterIrrigation()
+{
+  esp_sleep_enable_timer_wakeup(20 * 60  * 1000000ll);
+  Serial.println("Going to sleep now.");
+  delay(100);
+  esp_deep_sleep_start();
+}
+
 void delayedHibernate(void *parameter)
 {
   delay(EMERGENCY_HIBERNATE * 1000); // delay
   Serial.println("Something got stuck, entering emergency hibernate...");
   hibernate();
+}
+
+
+void callback(char* topic, byte* payload, unsigned int length) {
+  Serial.print("Message arrived on topic: ");
+  Serial.print(topic);
+  Serial.print(". Message: ");
+
+  // Convert the byte array to a String
+  String message;
+  for (int i = 0; i < length; i++) {
+    message += (char)payload[i];
+  }
+  Serial.println(message);
+
+  // Create a DynamicJsonDocument to hold the parsed JSON
+  DynamicJsonDocument sensor_conf(sensorCapacity);
+
+  // Deserialize the JSON data
+  DeserializationError error = deserializeJson(sensor_conf, message);
+
+  // Check for errors in deserialization
+  if (error) {
+    Serial.print("deserializeJson() failed: ");
+    Serial.println(error.f_str());
+    return;
+  }
+
+
+   for (int i = 0; i < deviceCount; i++){
+    FLORA_DEVICES[i][0] = sensor_conf["mac"];
+    FLORA_DEVICES[i][1] = sensor_conf["location"];
+    FLORA_DEVICES[i][3] = sensor_conf["min_temperature"];
+    FLORA_DEVICES[i][4] = sensor_conf["max_temperature"];
+    FLORA_DEVICES[i][5] = sensor_conf["min_moisture"];
+    FLORA_DEVICES[i][6] = sensor_conf["max_moisture"];
+    FLORA_DEVICES[i][7] = sensor_conf["min_light"];
+    FLORA_DEVICES[i][8] = sensor_conf["max_light"];
+    FLORA_DEVICES[i][9] = sensor_conf["min_conductivity"];
+    FLORA_DEVICES[i][10] = sensor_conf["max_conductivity"];
+  }
+}
+
+void getSensorParameters(){
+  static const String command = "cmd_req_devices";
+
+  client.subscribe(raspControlTopic.c_str());
+  client.publish(espControlTopic.c_str(), command.c_str(), MQTT_RETAIN);    //request for sensor parameters
+
+ 
 }
 
 void setup()
@@ -441,23 +505,7 @@ void setup()
   connectWifi(deviceJson);
   connectMqtt();
 
-  String t_control = 
-
-  client.publish("control", "payload", MQTT_RETAIN);    //request for sensor parameters
-
-  for (int i = 0; i < deviceCount; i++){
-    FLORA_DEVICES[i][0];
-    FLORA_DEVICES[i][1];
-    FLORA_DEVICES[i][2];
-    FLORA_DEVICES[i][3].toInt();
-    FLORA_DEVICES[i][4].toInt();
-    FLORA_DEVICES[i][5].toInt();
-    FLORA_DEVICES[i][6].toInt();
-    FLORA_DEVICES[i][7].toInt();
-    FLORA_DEVICES[i][8].toInt();
-    FLORA_DEVICES[i][9].toInt();
-    FLORA_DEVICES[i][10].toInt();
-  }
+  getSensorParameters();
 
   Serial.println("Initialize BLE client...");
   BLEDevice::init("");
@@ -489,20 +537,18 @@ void setup()
 
     Sensor sensor;
     sensor.setMac(FLORA_DEVICES[i][0]);
-    sensor.setLocation(FLORA_DEVICES[i][1]);
-    sensor.setPlantId(FLORA_DEVICES[i][2]);
-    sensor.setMinTemperature(FLORA_DEVICES[i][3].toInt());
-    sensor.setMaxTemperature(FLORA_DEVICES[i][4].toInt());
-    sensor.setMinMoisture(FLORA_DEVICES[i][5].toInt());
-    sensor.setMaxMoisture(FLORA_DEVICES[i][6].toInt());
-    sensor.setMinLight(FLORA_DEVICES[i][7].toInt());
-    sensor.setMaxLight(FLORA_DEVICES[i][8].toInt());
-    sensor.setMinConductivity(FLORA_DEVICES[i][9].toInt());
-    sensor.setMaxConductivity(FLORA_DEVICES[i][10].toInt());
+    sensor.setLocation(FLORA_DEVICES[i][1].toInt());
+    sensor.setMinTemperature(FLORA_DEVICES[i][2].toInt());
+    sensor.setMaxTemperature(FLORA_DEVICES[i][3].toInt());
+    sensor.setMinMoisture(FLORA_DEVICES[i][4].toInt());
+    sensor.setMaxMoisture(FLORA_DEVICES[i][5].toInt());
+    sensor.setMinLight(FLORA_DEVICES[i][6].toInt());
+    sensor.setMaxLight(FLORA_DEVICES[i][7].toInt());
+    sensor.setMinConductivity(FLORA_DEVICES[i][8].toInt());
+    sensor.setMaxConductivity(FLORA_DEVICES[i][9].toInt());
 
     // create sensor Json Document
     DynamicJsonDocument sensorJson(sensorCapacity);
-    sensorJson["id"] = sensor.getPlantId();
     sensorJson["location"] = sensor.getLocation();
     sensorJson["mac"] = sensor.getMac();
 
@@ -513,10 +559,19 @@ void setup()
       sensorJson["retryCount"] = retryCount;
 
       // create sensor topic
-      String sensorTopic = sensorBaseTopic + "/" + sensor.getLocation() + "/" + sensor.getPlantId();
+      String sensorTopic = sensorBaseTopic + "/" + sensor.getLocation();
 
       if (processFloraDevice(bleAddress, readBattery, retryCount, sensorJson, sensor))
       {
+        if(sensorJson["moistureLevel"] == 0){
+          addWater(200);
+          if(sensorJson["conductivityLevel"] == 0){
+            addFertilizer(5);
+          }
+          checkPH(7);
+          waterPlant(sensor.getLocation());
+          hibernateAfterIrrigation();
+        }
         char payload[sensorCapacity];
         serializeJson(sensorJson, payload);
         Serial.printf("- Sensor payload: %s\n", payload);

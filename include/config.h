@@ -1,9 +1,9 @@
 // Array of different Xiaomi Flora MAC addresses, their location, plant id and min, max values
-// <mac_address>, <location>, <plant_id>, <min_temperature>, <max_temperature>, <min_moisture>, <max_moisture>, <min_light>, <max_light>, <min_conductivity>, <max_conductivity>
-String FLORA_DEVICES[3][11] = {
-    {"5C:85:7E:12:C6:B8", "test", "Basilikum", "12", "32", "15", "65", "800", "20000", "350", "1000"},
-    {"C4:7C:8D:67:58:A0", "livingroom", "ficus-1", "8", "32", "20", "60", "2500", "35000", "350", "2000"},
-    {"C4:7C:8D:6A:0D:2F", "livingroom", "palm-1", "10", "35", "15", "60", "2500", "35000", "350", "2000"},
+// <mac_address>, <location>, <min_temperature>, <max_temperature>, <min_moisture>, <max_moisture>, <min_light>, <max_light>, <min_conductivity>, <max_conductivity>
+String FLORA_DEVICES[3][10] = {
+    {"5C:85:7E:12:C6:B8", "1", "12", "32", "15", "65", "800", "20000", "350", "1000"},
+    {"C4:7C:8D:67:58:A0", "2", "8", "32", "20", "60", "2500", "35000", "350", "2000"},
+    {"C4:7C:8D:6A:0D:2F", "3", "10", "35", "15", "60", "2500", "35000", "350", "2000"},
 };
 
 // Device settings
@@ -24,6 +24,6 @@ String FLORA_DEVICES[3][11] = {
 #define MQTT_PORT 1883                           // Mqqt port (default: 1883)
 #define MQTT_USERNAME "esp1"                      // Mqtt username [optional]
 #define MQTT_PASSWORD "esp1"                         // Mqtt username [optional]
-#define MQTT_BASE_TOPIC "test"                // The Miflora base topic
+#define MQTT_BASE_TOPIC "smartgrow"                // The Miflora base topic
 #define MQTT_RETRY_WAIT 5000                     // Retry delay between attempts to connect to the Mqtt broker
 #define MQTT_RETAIN false                        // Retain Mqtt messages (default: false)

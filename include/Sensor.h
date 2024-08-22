@@ -4,8 +4,7 @@ class Sensor
 {
 private:
     String mac;
-    String location;
-    String plantId;
+    int location;
     int minTemperature;
     int maxTemperature;
     int minMoisture;
@@ -26,24 +25,14 @@ public:
         this->mac = mac;
     }
 
-    String getLocation()
+    int getLocation()
     {
         return this->location;
     }
 
-    void setLocation(String location)
+    void setLocation(int location)
     {
         this->location = location;
-    }
-
-    String getPlantId()
-    {
-        return this->plantId;
-    }
-
-    void setPlantId(String plantId)
-    {
-        this->plantId = plantId;
     }
 
     int getMinTemperature()
