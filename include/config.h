@@ -1,11 +1,6 @@
-// Array of different Xiaomi Flora MAC addresses, their location, plant id and min, max values
-// <mac_address>, <location>, <min_temperature>, <max_temperature>, <min_moisture>, <max_moisture>, <min_light>, <max_light>, <min_conductivity>, <max_conductivity>
-String FLORA_DEVICES[3][10] = {
-    {"5C:85:7E:12:C6:B8", "1", "12", "32", "15", "65", "800", "20000", "350", "1000"},
-    {"C4:7C:8D:67:58:A0", "2", "8", "32", "20", "60", "2500", "35000", "350", "2000"},
-    {"C4:7C:8D:6A:0D:2F", "3", "10", "35", "15", "60", "2500", "35000", "350", "2000"},
-};
-
+// Array of different Xiaomi Flora MAC addresses, their pot, and min, max values
+// <mac_address>, <pot>, <min_moisture>, <max_moisture>, <min_conductivity>, <max_conductivity>
+String FLORA_DEVICES[3][6];
 // Device settings
 #define DEVICE_ID "esp32-1"        // Identifier of the esp32 device
 #define SLEEP_DURATION 60          // Sleep between to runs in seconds

@@ -3,115 +3,141 @@
 class Sensor
 {
 private:
-    String mac;
-    int location;
-    int minTemperature;
-    int maxTemperature;
-    int minMoisture;
-    int maxMoisture;
-    int minLight;
-    int maxLight;
-    int minConductivity;
-    int maxConductivity;
+    String Mac;
+    int Pot;
+
+    int MinMoisture;
+    int MaxMoisture;
+    int MinConductivity;
+    int MaxConductivity;
+    float MinPh;
+    float MaxPh;
+
+    float temperature;
+    float ph;
+    int moisture;
+    int light;
+    int conductivity;
+    int battery;
 
 public:
     String getMac()
     {
-        return this->mac;
+        return this->Mac;
     }
 
-    void setMac(String mac)
+    void setMac(String Mac)
     {
-        this->mac = mac;
+        this->Mac = Mac;
     }
 
-    int getLocation()
+    int getPot()
     {
-        return this->location;
+        return this->Pot;
     }
 
-    void setLocation(int location)
+    void setPot(int Pot)
     {
-        this->location = location;
-    }
-
-    int getMinTemperature()
-    {
-        return this->minTemperature;
-    }
-
-    void setMinTemperature(int minTemperature)
-    {
-        this->minTemperature = minTemperature;
-    }
-
-    int getMaxTemperature()
-    {
-        return this->maxTemperature;
-    }
-
-    void setMaxTemperature(int maxTemperature)
-    {
-        this->maxTemperature = maxTemperature;
+        this->Pot = Pot;
     }
 
     int getMinMoisture()
     {
-        return this->minMoisture;
+        return this->MinMoisture;
     }
 
-    void setMinMoisture(int minMoisture)
+    void setMinMoisture(int MinMoisture)
     {
-        this->minMoisture = minMoisture;
+        this->MinMoisture = MinMoisture;
     }
 
     int getMaxMoisture()
     {
-        return this->maxMoisture;
+        return this->MaxMoisture;
     }
 
-    void setMaxMoisture(int maxMoisture)
+    void setMaxMoisture(int MaxMoisture)
     {
-        this->maxMoisture = maxMoisture;
-    }
-
-    int getMinLight()
-    {
-        return this->minLight;
-    }
-
-    void setMinLight(int minLight)
-    {
-        this->minLight = minLight;
-    }
-
-    int getMaxLight()
-    {
-        return this->maxLight;
-    }
-
-    void setMaxLight(int maxLight)
-    {
-        this->maxLight = maxLight;
+        this->MaxMoisture = MaxMoisture;
     }
 
     int getMinConductivity()
     {
-        return this->minConductivity;
+        return this->MinConductivity;
     }
 
-    void setMinConductivity(int minConductivity)
+    void setMinConductivity(int MinConductivity)
     {
-        this->minConductivity = minConductivity;
+        this->MinConductivity = MinConductivity;
     }
 
     int getMaxConductivity()
     {
-        return this->maxConductivity;
+        return this->MaxConductivity;
     }
 
-    void setMaxConductivity(int maxConductivity)
+    void setMaxConductivity(int MaxConductivity)
     {
-        this->maxConductivity = maxConductivity;
+        this->MaxConductivity = MaxConductivity;
+    }
+
+    float gettemperature()
+    {
+        return this->temperature;
+    }
+
+    void settemperature(float temperature)
+    {
+        this->temperature = temperature;
+    }
+    
+    float getph()
+    {
+        return this->ph;
+    }
+
+    void setph(float ph)
+    {
+        this->ph = ph;
+    }
+
+    int getmoisture()
+    {
+        return this->moisture;
+    }
+
+    void setmoisture(int moisture)
+    {
+        this->moisture = moisture;
+    }
+
+    int getlight()
+    {
+        return this->light;
+    }
+
+    void setlight(int light)
+    {
+        this->light = light;
+    }
+
+    int getconductivity()
+    {
+        return this->conductivity;
+    }
+
+    void setconductivity(int conductivity)
+    {
+        this->conductivity = conductivity;
+    }
+
+    int getbattery()
+    {
+        return this->battery;
+    }
+
+    void setbattery(int battery)
+    {
+        this->battery = battery;
     }
 };

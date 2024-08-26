@@ -305,13 +305,16 @@ bool readFloraDataCharacteristic(BLERemoteService *floraService, ArduinoJson::Js
 
   // add all valid measurment values to the json
   jsonDocument["temperature"] = temperature;
-  jsonDocument["temperatureLevel"] = calculateMeasurementLevel((int)temperature, sensor.getMinTemperature(), sensor.getMaxTemperature());
+  //jsonDocument["temperatureLevel"] = calculateMeasurementLevel((int)temperature, sensor.getMinTemperature(), sensor.getMaxTemperature());
   jsonDocument["moisture"] = moisture;
-  jsonDocument["moistureLevel"] = calculateMeasurementLevel(moisture, sensor.getMinMoisture(), sensor.getMaxMoisture());
+  //jsonDocument["moistureLevel"] = calculateMeasurementLevel(moisture, sensor.getMinMoisture(), sensor.getMaxMoisture());
   jsonDocument["light"] = light;
-  jsonDocument["lightLevel"] = calculateMeasurementLevel(light, sensor.getMinLight(), sensor.getMaxLight());
+  //jsonDocument["lightLevel"] = calculateMeasurementLevel(light, sensor.getMinLight(), sensor.getMaxLight());
   jsonDocument["conductivity"] = conductivity;
-  jsonDocument["conductivityLevel"] = calculateMeasurementLevel(conductivity, sensor.getMinLight(), sensor.getMaxLight());
+  //jsonDocument["conductivityLevel"] = calculateMeasurementLevel(conductivity, sensor.getMinLight(), sensor.getMaxLight());
+  jsonDocument["waterlevel"] = waterlevel;
+  jsonDocument["fertilizerlevel"] = fertilizerlevel;
+  jsonDocument["acidlevel"] = acidlevel;
 
   return true;
 }
@@ -449,6 +452,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
   Serial.println(message);
 
+  message.trim();
+
   // Create a DynamicJsonDocument to hold the parsed JSON
   DynamicJsonDocument sensor_conf(sensorCapacity);
 
@@ -461,10 +466,10 @@ void callback(char* topic, byte* payload, unsigned int length) {
     Serial.println(error.f_str());
     return;
   }
+    String mac = sensor_conf["mac"];
 
-
-   for (int i = 0; i < deviceCount; i++){
-    FLORA_DEVICES[i][0] = sensor_conf["mac"];
+  for (int i = 0; i < deviceCount; i++){
+    FLORA_DEVICES[i][0] = mac.c_str();
     FLORA_DEVICES[i][1] = sensor_conf["location"];
     FLORA_DEVICES[i][3] = sensor_conf["min_temperature"];
     FLORA_DEVICES[i][4] = sensor_conf["max_temperature"];
@@ -537,7 +542,7 @@ void setup()
 
     Sensor sensor;
     sensor.setMac(FLORA_DEVICES[i][0]);
-    sensor.setLocation(FLORA_DEVICES[i][1].toInt());
+    sensor.setPot(FLORA_DEVICES[i][1].toInt());
     sensor.setMinTemperature(FLORA_DEVICES[i][2].toInt());
     sensor.setMaxTemperature(FLORA_DEVICES[i][3].toInt());
     sensor.setMinMoisture(FLORA_DEVICES[i][4].toInt());
@@ -549,7 +554,7 @@ void setup()
 
     // create sensor Json Document
     DynamicJsonDocument sensorJson(sensorCapacity);
-    sensorJson["location"] = sensor.getLocation();
+    sensorJson["location"] = sensor.getPot();
     sensorJson["mac"] = sensor.getMac();
 
     BLEAddress bleAddress(sensor.getMac().c_str());
@@ -559,7 +564,7 @@ void setup()
       sensorJson["retryCount"] = retryCount;
 
       // create sensor topic
-      String sensorTopic = sensorBaseTopic + "/" + sensor.getLocation();
+      String sensorTopic = sensorBaseTopic + "/" + sensor.getPot();
 
       if (processFloraDevice(bleAddress, readBattery, retryCount, sensorJson, sensor))
       {
@@ -569,7 +574,7 @@ void setup()
             addFertilizer(5);
           }
           checkPH(7);
-          waterPlant(sensor.getLocation());
+          waterPlant(sensor.getPot());
           hibernateAfterIrrigation();
         }
         char payload[sensorCapacity];
