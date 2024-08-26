@@ -471,12 +471,8 @@ void callback(char* topic, byte* payload, unsigned int length) {
   for (int i = 0; i < deviceCount; i++){
     FLORA_DEVICES[i][0] = mac.c_str();
     FLORA_DEVICES[i][1] = sensor_conf["location"];
-    FLORA_DEVICES[i][3] = sensor_conf["min_temperature"];
-    FLORA_DEVICES[i][4] = sensor_conf["max_temperature"];
     FLORA_DEVICES[i][5] = sensor_conf["min_moisture"];
     FLORA_DEVICES[i][6] = sensor_conf["max_moisture"];
-    FLORA_DEVICES[i][7] = sensor_conf["min_light"];
-    FLORA_DEVICES[i][8] = sensor_conf["max_light"];
     FLORA_DEVICES[i][9] = sensor_conf["min_conductivity"];
     FLORA_DEVICES[i][10] = sensor_conf["max_conductivity"];
   }
@@ -543,12 +539,8 @@ void setup()
     Sensor sensor;
     sensor.setMac(FLORA_DEVICES[i][0]);
     sensor.setPot(FLORA_DEVICES[i][1].toInt());
-    sensor.setMinTemperature(FLORA_DEVICES[i][2].toInt());
-    sensor.setMaxTemperature(FLORA_DEVICES[i][3].toInt());
     sensor.setMinMoisture(FLORA_DEVICES[i][4].toInt());
     sensor.setMaxMoisture(FLORA_DEVICES[i][5].toInt());
-    sensor.setMinLight(FLORA_DEVICES[i][6].toInt());
-    sensor.setMaxLight(FLORA_DEVICES[i][7].toInt());
     sensor.setMinConductivity(FLORA_DEVICES[i][8].toInt());
     sensor.setMaxConductivity(FLORA_DEVICES[i][9].toInt());
 
