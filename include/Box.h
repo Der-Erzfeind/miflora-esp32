@@ -4,50 +4,50 @@ class Box{
 
 private:
 
-    int volMix;
-    int volWater;
-    int volFertilizer;
-    int volAcid;
+    int volmix;
+    int volwater;
+    int volfertilizer;
+    int volacid;
 
 public:
 
     int getvolMix()
     {
-        return this->volMix;
+        return this->volmix;
     }
 
-    void setvolMix(int volMix)
+    void setvolMix(int volmix)
     {
-        this->volMix = volMix;
+        this->volmix = volmix;
     }
 
     int getvolWater()
     {
-        return this->volWater;
+        return this->volwater;
     }
 
-    void setvolWater(int volWater)
+    void setvolWater(int volwater)
     {
-        this->volWater = volWater;
+        this->volwater = volwater;
     }
 
     int getvolFertilizer()
     {
-        return this->volFertilizer;
+        return this->volfertilizer;
     }
 
-    void setvolFertilizer(int volFertilizer)
+    void setvolFertilizer(int volfertilizer)
     {
-        this->volFertilizer = volFertilizer;
+        this->volfertilizer = volfertilizer;
     }
 
     int getvolAcid()
     {
-        return this->volAcid;
+        return this->volacid;
     }
 
-    void setvolAcid(int volAcid)
+    void setvolAcid(int volacid)
     {
-        this->volAcid = volAcid;
+        this->volacid = volacid;
     }
 };

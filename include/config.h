@@ -1,8 +1,5 @@
-// Array of different Xiaomi Flora MAC addresses, their pot, and min, max values
-// <mac_address>, <pot>, <min_moisture>, <max_moisture>, <min_conductivity>, <max_conductivity>
-String FLORA_DEVICES[3][6];
 // Device settings
-#define DEVICE_ID "esp32-1"        // Identifier of the esp32 device
+#define DEVICE_ID "10:06:1C:81:4E:10"        // Identifier of the esp32 device
 #define SLEEP_DURATION 60          // Sleep between to runs in seconds
 #define EMERGENCY_HIBERNATE 1 * 60 // Emergency hibernate countdown in seconds
 #define BATTERY_INTERVAL 1         // How often should the battery be read - in run count

@@ -81,6 +81,26 @@ public:
         this->MaxConductivity = MaxConductivity;
     }
 
+    float getMinPh()
+    {
+        return this->MinPh;
+    }
+
+    void setMinPh(float MinPh)
+    {
+        this->MinPh = MinPh;
+    }
+    
+    float getMaxPh()
+    {
+        return this->MaxPh;
+    }
+
+    void setMaxPh(float MaxPh)
+    {
+        this->MaxPh = MaxPh;
+    }
+
     float gettemperature()
     {
         return this->temperature;
