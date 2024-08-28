@@ -1,6 +1,9 @@
 #include <Arduino.h>
 #include "ph_sensor.cpp"
 
+#ifndef control.h
+#define control.h
+
 #define PIN_ARDUINO_PWR 2
 #define PIN_US1_TRIGGER 1
 #define PIN_US1_ECHO 1
@@ -47,3 +50,5 @@ bool addWater(uint ml);
 bool addFertilizer(uint ml);
 bool checkPH(float ph);
 bool waterPlant(int pumpID);
+
+#endif

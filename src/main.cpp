@@ -87,6 +87,8 @@ PubSubClient client(espClient);
 Sensor sensorArray[3];
 Box box;
 
+void callback(char* topic, byte* payload, unsigned int length);
+
 void connectWifi(ArduinoJson::JsonDocument &jsonDocument)
 {
   Serial.println("Connecting to WiFi...");
@@ -117,6 +119,8 @@ void connectMqtt()
 {
   Serial.println("Connecting to MQTT...");
   client.setServer(MQTT_HOST, MQTT_PORT);
+  client.setCallback(callback);
+  client.setBufferSize(600);
   String lwtTopic = deviceBaseTopic + "/lwt";
   String deviceMac = WiFi.macAddress();
   String part = deviceMac.substring(9);
@@ -537,11 +541,14 @@ void setup()
   //subscribing to receive sensor parameters
   if(client.subscribe(sensorParameterTopic.c_str()))
   {
-    Serial.println("subscribing to sensor parameter topic");
+    Serial.print("subscribed to ");
+    Serial.printf("%s\n", sensorParameterTopic.c_str());
   }
   else
   {
-    Serial.println("- subscribing sensor parameter topic failed!");
+    Serial.print("- subscribing to ");
+    Serial.printf("%s\n", sensorParameterTopic.c_str());
+    Serial.printf(" failed\n");
   }
 
   delay(1000);
@@ -549,12 +556,14 @@ void setup()
   //request for sensor parameters
   if(client.publish(raspiControlTopic.c_str(), REQ_PARAM, MQTT_RETAIN))
   {
-    Serial.println("publishing sensor request");
+    Serial.print("publishing sensor request to ");
+    Serial.printf("%s\n", raspiControlTopic.c_str());
   }
   else
   {
     Serial.println("- Publishing sensor request failed!");
   }
+
 
   Serial.println("Initialize BLE client...");
   BLEDevice::init("");
