@@ -285,15 +285,19 @@ bool readFloraDataCharacteristic(BLERemoteService *floraService, ArduinoJson::Js
 
   int16_t *temp_raw = (int16_t *)val;
   float temperature = (*temp_raw) / ((float)10.0);
-  Serial.printf("-- Temperature: %f\n", temperature);
+  sensor.settemperature(temperature);
+  Serial.printf("-- Temperature: %f\n", sensor.gettemperature());
 
   int moisture = val[7];
+  sensor.setmoisture(moisture);
   Serial.printf("-- Moisture: %d\n", moisture);
 
   int light = val[3] + val[4] * 256;
+  sensor.setlight(light);
   Serial.printf("-- Light: %d\n", light);
 
   int conductivity = val[8] + val[9] * 256;
+  sensor.setconductivity(conductivity);
   Serial.printf("-- Conductivity: %d\n", conductivity);
 
   if (temperature < -20 || temperature > 50)
@@ -320,29 +324,19 @@ bool readFloraDataCharacteristic(BLERemoteService *floraService, ArduinoJson::Js
     return false;
   }
 
-
-  // Add main data
-  jsonDocument["Mac"] = WiFi.macAddress();
-  jsonDocument["volmix"] = 60;
-  jsonDocument["volwater"] = 20;
-  jsonDocument["volfertilizer"] = 60;
-  jsonDocument["volacid"] = 60;
-
   // Create an array for sensors
-  JsonArray sensors = jsonDocument.createNestedArray("sensors");
+  JsonArray sensorJsonArray = jsonDocument.createNestedArray("sensors");
 
   // Create and add the first sensor object
-  for (int i = 0; i < deviceCount; i++) {
   
-  JsonObject sensor = sensors.createNestedObject();
-    sensor["Mac"] = sensorArray[i].getMac();
-    sensor["temperature"] = sensorArray[i].gettemperature();
-    sensor["ph"] = sensorArray[i].getph();
-    sensor["moisture"] =sensorArray[i].getmoisture();
-    sensor["light"] = sensorArray[i].getlight();
-    sensor["conductivity"] = sensorArray[i].getconductivity();
-    sensor["battery"] = sensorArray[i].getbattery();
-  }
+  JsonObject sensorJsonObject = sensorJsonArray.createNestedObject();
+    sensorJsonObject["Mac"] = sensor.getMac();
+    sensorJsonObject["temperature"] = sensor.gettemperature();
+    sensorJsonObject["ph"] = sensor.getph();
+    sensorJsonObject["moisture"] =sensor.getmoisture();
+    sensorJsonObject["light"] = sensor.getlight();
+    sensorJsonObject["conductivity"] = sensor.getconductivity();
+    sensorJsonObject["battery"] = sensor.getbattery();
 
   return true;
 }
@@ -602,6 +596,15 @@ void setup()
   // check if battery status should be read - based on boot count
   bool readBattery = ((bootCount % BATTERY_INTERVAL) == 0);
 
+  DynamicJsonDocument sensorJson(sensorCapacity);
+
+    // Add main data
+  sensorJson["Mac"] = WiFi.macAddress();
+  sensorJson["volmix"] = 60;
+  sensorJson["volwater"] = 20;
+  sensorJson["volfertilizer"] = 60;
+  sensorJson["volacid"] = 60;
+
   // process devices
   for (int i = 0; i < deviceCount; i++)
   {
@@ -609,9 +612,6 @@ void setup()
     int retryCount = 0;
 
     // create sensor Json Document
-    DynamicJsonDocument sensorJson(sensorCapacity);
-    sensorJson["Pot"] = sensorArray[i].getPot();
-    sensorJson["Mac"] = sensorArray[i].getMac();
 
     BLEAddress bleAddress(sensorArray[i].getMac().c_str());
     while (retryCount < SENSOR_RETRY)
