@@ -42,8 +42,6 @@
    SOFTWARE.
 */
 
-#define REQ_PARAM "REQ_SENSOR_PARAM"
-
 // device count
 static int deviceCount;
 
@@ -61,18 +59,20 @@ static const String deviceBaseTopic = String(MQTT_BASE_TOPIC) + "/" + String(DEV
 // the base sensor topic
 static const String sensorBaseTopic = String(MQTT_BASE_TOPIC) + "/" + String(DEVICE_ID) + "/sensor";
 
-static const String raspiControlTopic = String(MQTT_BASE_TOPIC) + "/" + String(DEVICE_ID) + "/raspicontrol";
+static const String parameterRequestTopic = String(MQTT_BASE_TOPIC) + "/parameterrequest";
 
-static const String sensorParameterTopic = String(MQTT_BASE_TOPIC) + "/" + String(DEVICE_ID) + "/sensorparameter";
+static const String parameterReceiveTopic = String(MQTT_BASE_TOPIC) + "/" + String(DEVICE_ID) + "/sensorparameter";
 
 static const String meassurementTopic = String(MQTT_BASE_TOPIC) + "/" + String(DEVICE_ID) + "/meassurement";
+
+static const String parameterRequest = String(DEVICE_ID);
 
 
 // the capacity of the device json document
 static const size_t deviceCapacity = JSON_OBJECT_SIZE(5) + 80;
 
 // the capacity of the sensor json document
-static const size_t sensorCapacity = JSON_OBJECT_SIZE(16) + 230;
+static const size_t sensorCapacity = 2000;       //JSON_OBJECT_SIZE(16) + 230;
 
 static const size_t commandCapacity = 200;
 
@@ -119,8 +119,6 @@ void connectMqtt()
 {
   Serial.println("Connecting to MQTT...");
   client.setServer(MQTT_HOST, MQTT_PORT);
-  client.setCallback(callback);
-  client.setBufferSize(600);
   String lwtTopic = deviceBaseTopic + "/lwt";
   String deviceMac = WiFi.macAddress();
   String part = deviceMac.substring(9);
@@ -132,6 +130,7 @@ void connectMqtt()
   while (!client.connected())
   {
     if (!client.connect(mqttClientId.c_str(), MQTT_USERNAME, MQTT_PASSWORD, lwtTopic.c_str(), 1, true, "offline"))
+    //if (!client.connect(mqttClientId.c_str(), MQTT_USERNAME, MQTT_PASSWORD))
     {
       Serial.print("MQTT connection failed:");
       Serial.print(client.state());
@@ -145,11 +144,16 @@ void connectMqtt()
   }
   Serial.println("MQTT connected");
   Serial.println("");
+  client.setBufferSize(sensorCapacity);
+  Serial.printf("BufferSize set to %d\n", client.getBufferSize());
+  client.setCallback(callback);
+  Serial.println("Callback set");
 }
 
 void disconnectMqtt()
 {
   client.publish(String(deviceBaseTopic + "/lwt").c_str(), "offline", MQTT_RETAIN);
+  client.unsubscribe(parameterReceiveTopic.c_str());
   client.disconnect();
   Serial.println("MQTT disconnected");
 }
@@ -316,20 +320,29 @@ bool readFloraDataCharacteristic(BLERemoteService *floraService, ArduinoJson::Js
     return false;
   }
 
-  // add all valid measurment values to the json
-  jsonDocument["temperature"] = temperature;
-  //jsonDocument["temperatureLevel"] = calculateMeasurementLevel((int)temperature, sensor.getMinTemperature(), sensor.getMaxTemperature());
-  jsonDocument["moisture"] = moisture;
-  //jsonDocument["moistureLevel"] = calculateMeasurementLevel(moisture, sensor.getMinMoisture(), sensor.getMaxMoisture());
-  jsonDocument["light"] = light;
-  //jsonDocument["lightLevel"] = calculateMeasurementLevel(light, sensor.getMinLight(), sensor.getMaxLight());
-  jsonDocument["conductivity"] = conductivity;
-  //jsonDocument["conductivityLevel"] = calculateMeasurementLevel(conductivity, sensor.getMinLight(), sensor.getMaxLight());
-  jsonDocument["volmix"] = box.getvolMix();
-  jsonDocument["volwater"] = box.getvolWater();
-  jsonDocument["volfertilizer"] = box.getvolFertilizer();
-  jsonDocument["volacid"] = box.getvolAcid();
+
+  // Add main data
   jsonDocument["Mac"] = WiFi.macAddress();
+  jsonDocument["volmix"] = 60;
+  jsonDocument["volwater"] = 20;
+  jsonDocument["volfertilizer"] = 60;
+  jsonDocument["volacid"] = 60;
+
+  // Create an array for sensors
+  JsonArray sensors = jsonDocument.createNestedArray("sensors");
+
+  // Create and add the first sensor object
+  for (int i = 0; i < deviceCount; i++) {
+  
+  JsonObject sensor = sensors.createNestedObject();
+    sensor["Mac"] = sensorArray[i].getMac();
+    sensor["temperature"] = sensorArray[i].gettemperature();
+    sensor["ph"] = sensorArray[i].getph();
+    sensor["moisture"] =sensorArray[i].getmoisture();
+    sensor["light"] = sensorArray[i].getlight();
+    sensor["conductivity"] = sensorArray[i].getconductivity();
+    sensor["battery"] = sensorArray[i].getbattery();
+  }
 
   return true;
 }
@@ -539,29 +552,31 @@ void setup()
   connectMqtt();
 
   //subscribing to receive sensor parameters
-  if(client.subscribe(sensorParameterTopic.c_str()))
+  if(client.subscribe(parameterReceiveTopic.c_str()))
   {
     Serial.print("subscribed to ");
-    Serial.printf("%s\n", sensorParameterTopic.c_str());
+    Serial.printf("%s\n", parameterReceiveTopic.c_str());
   }
   else
   {
     Serial.print("- subscribing to ");
-    Serial.printf("%s\n", sensorParameterTopic.c_str());
+    Serial.printf("%s\n", parameterReceiveTopic.c_str());
     Serial.printf(" failed\n");
   }
 
-  delay(1000);
-
   //request for sensor parameters
-  if(client.publish(raspiControlTopic.c_str(), REQ_PARAM, MQTT_RETAIN))
+  if(client.publish(parameterRequestTopic.c_str(), parameterRequest.c_str(), MQTT_RETAIN))
   {
     Serial.print("publishing sensor request to ");
-    Serial.printf("%s\n", raspiControlTopic.c_str());
+    Serial.printf("%s\n", parameterRequestTopic.c_str());
   }
   else
   {
     Serial.println("- Publishing sensor request failed!");
+  }
+
+  while(sensorArray[0].getMac() == ""){
+    client.loop();
   }
 
 
@@ -605,7 +620,6 @@ void setup()
       sensorJson["retryCount"] = retryCount;
 
       // create sensor topic
-      String sensorTopic = sensorBaseTopic + "/" + sensorArray[i].getPot();
 
       if (processFloraDevice(bleAddress, readBattery, retryCount, sensorJson, sensorArray[i]))
       {
@@ -621,9 +635,9 @@ void setup()
         char payload[sensorCapacity];
         serializeJson(sensorJson, payload);
         Serial.printf("- Sensor payload: %s\n", payload);
-        if (client.publish(sensorTopic.c_str(), payload, MQTT_RETAIN))
+        if (client.publish(meassurementTopic.c_str(), payload, MQTT_RETAIN))
         {
-          Serial.printf("-- Publishing --> %s\n", sensorTopic.c_str());
+          Serial.printf("-- Publishing --> %s\n", meassurementTopic.c_str());
         }
         else
         {
