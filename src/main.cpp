@@ -236,7 +236,48 @@ byte calculateMeasurementLevel(int current, int min, int max)
   }
 }
 
-bool readFloraDataCharacteristic(BLERemoteService *floraService, ArduinoJson::JsonDocument &jsonDocument, Sensor sensor)
+bool readFloraBatteryCharacteristic(BLERemoteService *floraService, Sensor &sensor)
+{
+  BLERemoteCharacteristic *floraCharacteristic = nullptr;
+
+  // get the device battery characteristic
+  Serial.println("- Access battery characteristic from device");
+  try
+  {
+    floraCharacteristic = floraService->getCharacteristic(uuid_version_battery);
+  }
+  catch (...)
+  {
+    // something went wrong
+  }
+  if (floraCharacteristic == nullptr)
+  {
+    Serial.println("-- Failed, skipping battery level");
+    return false;
+  }
+
+  // read characteristic value
+  Serial.println("- Read value from characteristic");
+  std::string value;
+  try
+  {
+    value = floraCharacteristic->readValue();
+  }
+  catch (...)
+  {
+    // something went wrong
+    Serial.println("-- Failed, skipping battery level");
+    return false;
+  }
+  const char *val2 = value.c_str();
+  int battery = val2[0];
+
+  sensor.setbattery(battery);
+
+  return true;
+}
+
+bool readFloraDataCharacteristic(BLERemoteService *floraService, bool readBattery, ArduinoJson::JsonDocument &jsonDocument, Sensor sensor)
 {
   BLERemoteCharacteristic *floraCharacteristic = nullptr;
 
@@ -296,6 +337,10 @@ bool readFloraDataCharacteristic(BLERemoteService *floraService, ArduinoJson::Js
   sensor.setconductivity(conductivity);
   Serial.printf("-- Conductivity: %d\n", conductivity);
 
+  if(readBattery){
+    readFloraBatteryCharacteristic(floraService, sensor);
+  }
+
   if (temperature < -20 || temperature > 50)
   {
     Serial.println("-- Unreasonable values received for temperature, skip publish");
@@ -337,48 +382,6 @@ bool readFloraDataCharacteristic(BLERemoteService *floraService, ArduinoJson::Js
   return true;
 }
 
-bool readFloraBatteryCharacteristic(BLERemoteService *floraService, ArduinoJson::JsonDocument &jsonDocument)
-{
-  BLERemoteCharacteristic *floraCharacteristic = nullptr;
-
-  // get the device battery characteristic
-  Serial.println("- Access battery characteristic from device");
-  try
-  {
-    floraCharacteristic = floraService->getCharacteristic(uuid_version_battery);
-  }
-  catch (...)
-  {
-    // something went wrong
-  }
-  if (floraCharacteristic == nullptr)
-  {
-    Serial.println("-- Failed, skipping battery level");
-    return false;
-  }
-
-  // read characteristic value
-  Serial.println("- Read value from characteristic");
-  std::string value;
-  try
-  {
-    value = floraCharacteristic->readValue();
-  }
-  catch (...)
-  {
-    // something went wrong
-    Serial.println("-- Failed, skipping battery level");
-    return false;
-  }
-  const char *val2 = value.c_str();
-  int battery = val2[0];
-
-  jsonDocument["battery"] = battery;
-  jsonDocument["batteryLow"] = battery <= BATTERY_THRESHOLD_LOW;
-  jsonDocument["batteryLevel"] = calculateMeasurementLevel(battery, String(BATTERY_THRESHOLD_LOW).toInt(), String(BATTERY_THRESHOLD_MED).toInt());
-
-  return true;
-}
 
 bool processFloraService(BLERemoteService *floraService, bool readBattery, ArduinoJson::JsonDocument &jsonDocument, Sensor sensor)
 {
@@ -388,21 +391,16 @@ bool processFloraService(BLERemoteService *floraService, bool readBattery, Ardui
     return false;
   }
 
-  bool dataSuccess = readFloraDataCharacteristic(floraService, jsonDocument, sensor);
+  bool dataSuccess = readFloraDataCharacteristic(floraService, readBattery, jsonDocument, sensor);
 
-  bool batterySuccess = true;
-  if (readBattery)
-  {
-    batterySuccess = readFloraBatteryCharacteristic(floraService, jsonDocument);
-  }
-
-  return dataSuccess && batterySuccess;
+  return dataSuccess;
 }
 
-bool processFloraDevice(BLEAddress floraAddress, bool getBattery, int tryCount, ArduinoJson::JsonDocument &jsonDocument, Sensor sensor)
+bool processFloraDevice(bool getBattery, int tryCount, ArduinoJson::JsonDocument &jsonDocument, Sensor &sensor)
 {
+  BLEAddress floraAddress(sensor.getMac().c_str());
   Serial.print("Processing Flora device at ");
-  Serial.print(floraAddress.toString().c_str());
+  Serial.printf("%s", floraAddress.toString());
   Serial.print(" (try ");
   Serial.print(tryCount);
   Serial.println(")");
@@ -423,7 +421,6 @@ bool processFloraDevice(BLEAddress floraAddress, bool getBattery, int tryCount, 
   }
 
   Serial.printf("- %s has ble RSSI of %d\n", floraAddress.toString().c_str(), floraClient->getRssi());  
-  jsonDocument["rssi"] = floraClient->getRssi();
 
   // process devices data
   bool success = processFloraService(floraService, getBattery, jsonDocument, sensor);
@@ -532,7 +529,7 @@ void setup()
   bootCount++;
 
   // create a hibernate task in case something gets stuck
-  xTaskCreate(delayedHibernate, "hibernate", 4096, NULL, 1, &hibernateTaskHandle);
+  //xTaskCreate(delayedHibernate, "hibernate", 4096, NULL, 1, &hibernateTaskHandle);
 
   // create device Json Document
   DynamicJsonDocument deviceJson(deviceCapacity);
@@ -575,21 +572,6 @@ void setup()
   BLEDevice::init("");
   BLEDevice::setPower(ESP_PWR_LVL_P9);
 
-  // publish device status
-  char payload[deviceCapacity];
-  serializeJson(deviceJson, payload);
-  String deviceStatusTopic = deviceBaseTopic + "/status";
-
-  Serial.printf("Device status: %s\n", payload);
-  if (client.publish(deviceStatusTopic.c_str(), payload, MQTT_RETAIN))
-  {
-    Serial.printf("- Publishing device status -> %s\n", deviceStatusTopic.c_str());
-  }
-  else
-  {
-    Serial.println("- Publishing device status failed!");
-  }
-
   // check if battery status should be read - based on boot count
   bool readBattery = ((bootCount % BATTERY_INTERVAL) == 0);
 
@@ -610,15 +592,12 @@ void setup()
 
     // create sensor Json Document
 
-    BLEAddress bleAddress(sensorArray[i].getMac().c_str());
     while (retryCount < SENSOR_RETRY)
     {
       retryCount++;
-      sensorJson["retryCount"] = retryCount;
 
       // create sensor topic
-
-      if (processFloraDevice(bleAddress, readBattery, retryCount, sensorJson, sensorArray[i]))
+      if (processFloraDevice(readBattery, retryCount, sensorJson, sensorArray[i]))
       {
        /*  if(sensorJson["moistureLevel"] == 0){
           addWater(200);
@@ -652,7 +631,7 @@ void setup()
   disconnectWifi();
 
   // delete emergency hibernate task
-  vTaskDelete(hibernateTaskHandle);
+  //vTaskDelete(hibernateTaskHandle);
 
   // go to sleep now
   hibernate();

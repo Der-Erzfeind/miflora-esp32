@@ -5,7 +5,7 @@
 #define BATTERY_INTERVAL 1         // How often should the battery be read - in run count
 #define BATTERY_THRESHOLD_LOW 20   // Battery threshold when battery gets low
 #define BATTERY_THRESHOLD_MED 80   // Battery threshold when battery gets medium
-#define SENSOR_RETRY 5             // How often should a sensor be retried in a run when something fails
+#define SENSOR_RETRY 2             // How often should a sensor be retried in a run when something fails
 
 // Wifi settings
 #define WIFI_SSID "WLAN von Jonas"              // SSID of your WiFi network
