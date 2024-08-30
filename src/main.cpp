@@ -400,7 +400,7 @@ bool processFloraDevice(bool getBattery, int tryCount, ArduinoJson::JsonDocument
 {
   BLEAddress floraAddress(sensor.getMac().c_str());
   Serial.print("Processing Flora device at ");
-  Serial.printf("%s", floraAddress.toString());
+  Serial.print(floraAddress.toString().c_str());
   Serial.print(" (try ");
   Serial.print(tryCount);
   Serial.println(")");
@@ -529,7 +529,7 @@ void setup()
   bootCount++;
 
   // create a hibernate task in case something gets stuck
-  //xTaskCreate(delayedHibernate, "hibernate", 4096, NULL, 1, &hibernateTaskHandle);
+  xTaskCreate(delayedHibernate, "hibernate", 4096, NULL, 1, &hibernateTaskHandle);
 
   // create device Json Document
   DynamicJsonDocument deviceJson(deviceCapacity);
@@ -631,7 +631,7 @@ void setup()
   disconnectWifi();
 
   // delete emergency hibernate task
-  //vTaskDelete(hibernateTaskHandle);
+  vTaskDelete(hibernateTaskHandle);
 
   // go to sleep now
   hibernate();
