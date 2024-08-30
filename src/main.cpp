@@ -54,10 +54,7 @@ static const BLEUUID uuid_sensor_data("00001a01-0000-1000-8000-00805f9b34fb");
 static const BLEUUID uuid_write_mode("00001a00-0000-1000-8000-00805f9b34fb");
 
 // the device topic
-static const String deviceBaseTopic = String(MQTT_BASE_TOPIC) + "/" + String(DEVICE_ID) + "/device";
-
-// the base sensor topic
-static const String sensorBaseTopic = String(MQTT_BASE_TOPIC) + "/" + String(DEVICE_ID) + "/sensor";
+static const String deviceBaseTopic = String(MQTT_BASE_TOPIC) + "/" + String(DEVICE_ID);
 
 static const String parameterRequestTopic = String(MQTT_BASE_TOPIC) + "/parameterrequest";
 
@@ -153,7 +150,6 @@ void connectMqtt()
 void disconnectMqtt()
 {
   client.publish(String(deviceBaseTopic + "/lwt").c_str(), "offline", MQTT_RETAIN);
-  client.unsubscribe(parameterReceiveTopic.c_str());
   client.disconnect();
   Serial.println("MQTT disconnected");
 }
@@ -573,6 +569,7 @@ void setup()
     client.loop();
   }
 
+  client.unsubscribe(parameterReceiveTopic.c_str());
 
   Serial.println("Initialize BLE client...");
   BLEDevice::init("");
