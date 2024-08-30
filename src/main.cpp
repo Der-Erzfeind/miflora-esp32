@@ -396,14 +396,42 @@ bool processFloraService(BLERemoteService *floraService, bool readBattery, Ardui
   return dataSuccess;
 }
 
+bool isValidMACAddress(const String& mac) {
+    // Check if the length is exactly 17 characters
+    if (mac.length() != 17) {
+        return false;
+    }
+
+    // Loop through each character in the string
+    for (int i = 0; i < mac.length(); i++) {
+        if (i % 3 == 2) {  // Every third character should be a ':' or '-'
+            if (mac[i] != ':' && mac[i] != '-') {
+                return false;
+            }
+        } else {  // The other characters should be hexadecimal digits
+            if (!isxdigit(mac[i])) {
+                return false;
+            }
+        }
+    }
+
+    // If all checks passed, the format is correct
+    return true;
+}
+
 bool processFloraDevice(bool getBattery, int tryCount, ArduinoJson::JsonDocument &jsonDocument, Sensor &sensor)
 {
-  BLEAddress floraAddress(sensor.getMac().c_str());
   Serial.print("Processing Flora device at ");
-  Serial.print(floraAddress.toString().c_str());
-  Serial.print(" (try ");
+  Serial.print(sensor.getMac().c_str());
+  Serial.print(" (try %d");
   Serial.print(tryCount);
   Serial.println(")");
+
+  if(!isValidMACAddress(sensor.getMac().c_str())){
+    Serial.println("not a valid Mac Address");
+    return false;
+  }
+  BLEAddress floraAddress(sensor.getMac().c_str());
 
   // connect to flora ble server
   BLEClient *floraClient = getFloraClient(floraAddress);
@@ -505,16 +533,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
     sensorArray[i].setMaxMoisture(sensorData["MaxMoisture"]);
     sensorArray[i].setMinConductivity(sensorData["MinConductivity"]);
     sensorArray[i].setMaxConductivity(sensorData["MaxConductivity"]);
-
-    Serial.printf("Sensor %d:\n", i + 1);
-    Serial.println(sensorArray[i].getMac());
-    Serial.println(sensorArray[i].getPot());
-    Serial.println(sensorArray[i].getMinPh());
-    Serial.println(sensorArray[i].getMaxPh());
-    Serial.println(sensorArray[i].getMinMoisture());
-    Serial.println(sensorArray[i].getMaxMoisture());
-    Serial.println(sensorArray[i].getMinConductivity());
-    Serial.println(sensorArray[i].getMaxConductivity());
   }
 }
 
@@ -529,7 +547,7 @@ void setup()
   bootCount++;
 
   // create a hibernate task in case something gets stuck
-  xTaskCreate(delayedHibernate, "hibernate", 4096, NULL, 1, &hibernateTaskHandle);
+  //xTaskCreate(delayedHibernate, "hibernate", 4096, NULL, 1, &hibernateTaskHandle);
 
   // create device Json Document
   DynamicJsonDocument deviceJson(deviceCapacity);
@@ -608,22 +626,23 @@ void setup()
           waterPlant(sensorArray[i].getPot());
           hibernateAfterIrrigation();
         } */
-        char payload[sensorCapacity];
-        serializeJson(sensorJson, payload);
-        Serial.printf("- Sensor payload: %s\n", payload);
-        if (client.publish(meassurementTopic.c_str(), payload, MQTT_RETAIN))
-        {
-          Serial.printf("-- Publishing --> %s\n", meassurementTopic.c_str());
-        }
-        else
-        {
-          Serial.println("-- Publishing failed!");
-        }
         break;
       }
       delay(3000); // wait for another try
     }
     delay(2000); // wait for next sensor
+  }
+  
+  char payload[sensorCapacity];
+  serializeJson(sensorJson, payload);
+  Serial.printf("- Sensor payload: %s\n", payload);
+  if (client.publish(meassurementTopic.c_str(), payload, MQTT_RETAIN))
+  {
+    Serial.printf("-- Publishing --> %s\n", meassurementTopic.c_str());
+  }
+  else
+  {
+    Serial.println("-- Publishing failed!");
   }
 
   // disconnect mqtt and wifi
@@ -631,7 +650,7 @@ void setup()
   disconnectWifi();
 
   // delete emergency hibernate task
-  vTaskDelete(hibernateTaskHandle);
+  //vTaskDelete(hibernateTaskHandle);
 
   // go to sleep now
   hibernate();
