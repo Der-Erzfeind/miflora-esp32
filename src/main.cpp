@@ -6,7 +6,7 @@
 #include "PubSubClient.h"
 #include "config.h"
 #include "Sensor.h"
-//#include "control.h"
+#include "control.h"
 #include "Box.h"
 
 /**
@@ -60,7 +60,7 @@ static const String parameterRequestTopic = String(MQTT_BASE_TOPIC) + "/paramete
 
 static const String parameterReceiveTopic = String(MQTT_BASE_TOPIC) + "/" + String(DEVICE_ID) + "/sensorparameter";
 
-static const String meassurementTopic = String(MQTT_BASE_TOPIC) + "/" + String(DEVICE_ID) + "/meassurement";
+static const String meassurementTopic = String(MQTT_BASE_TOPIC) + "/meassurement";
 
 static const String parameterRequest = String(DEVICE_ID);
 
@@ -423,9 +423,7 @@ bool processFloraDevice(bool getBattery, int tryCount, ArduinoJson::JsonDocument
 {
   Serial.print("Processing Flora device at ");
   Serial.print(sensor.getMac().c_str());
-  Serial.print(" (try %d");
-  Serial.print(tryCount);
-  Serial.println(")");
+  Serial.printf(" (try %d)\n", tryCount);
 
   if(!isValidMACAddress(sensor.getMac().c_str())){
     Serial.println("not a valid Mac Address");
@@ -470,7 +468,7 @@ void hibernate()
 void hibernateAfterIrrigation()
 {
   esp_sleep_enable_timer_wakeup(20 * 60  * 1000000ll);
-  Serial.println("Going to sleep now.");
+  Serial.println("Going to sleep after irrigation now.");
   delay(100);
   esp_deep_sleep_start();
 }
@@ -547,7 +545,7 @@ void setup()
   bootCount++;
 
   // create a hibernate task in case something gets stuck
-  //xTaskCreate(delayedHibernate, "hibernate", 4096, NULL, 1, &hibernateTaskHandle);
+  xTaskCreate(delayedHibernate, "hibernate", 4096, NULL, 1, &hibernateTaskHandle);
 
   // create device Json Document
   DynamicJsonDocument deviceJson(deviceCapacity);
@@ -617,15 +615,15 @@ void setup()
       // create sensor topic
       if (processFloraDevice(readBattery, retryCount, sensorJson, sensorArray[i]))
       {
-       /*  if(sensorJson["moistureLevel"] == 0){
+        if(!calculateMeasurementLevel(sensorArray[i].getmoisture(), sensorArray[i].getMinMoisture(), sensorArray[i].getMaxMoisture())){
           addWater(200);
-          if(sensorJson["conductivityLevel"] == 0){
+          if(!calculateMeasurementLevel(sensorArray[i].getconductivity(), sensorArray[i].getMinConductivity(), sensorArray[i].getMaxConductivity())){
             addFertilizer(5);
           }
-          checkPH(7);
+          checkPH(sensorArray[i].getMinPh());
           waterPlant(sensorArray[i].getPot());
           hibernateAfterIrrigation();
-        } */
+        }
         break;
       }
       delay(3000); // wait for another try
@@ -650,7 +648,7 @@ void setup()
   disconnectWifi();
 
   // delete emergency hibernate task
-  //vTaskDelete(hibernateTaskHandle);
+  vTaskDelete(hibernateTaskHandle);
 
   // go to sleep now
   hibernate();

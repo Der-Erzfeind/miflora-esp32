@@ -25,12 +25,12 @@
 
 
 // Define the pins to control
-const int pin1 = 2;
-const int pin2 = 3;
-const int pin3 = 4;
-const int pin4 = 5;
-const int pin5 = 6;
-const int pin6 = 7;
+const int pot1 = 2;
+const int pot2 = 3;
+const int pot3 = 4;
+const int pot4 = 7;
+const int pot5 = 4;
+const int pot6 = 5;
 
 void setup() {
 

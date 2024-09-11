@@ -11,6 +11,7 @@ void init_US(int trigger_pin, int echo_pin) {
 }
 
 float read_US(int trigger_pin, int echo_pin) {
+    Serial.println("reading distance from us sensor");
     digitalWrite(trigger_pin, LOW);
     delayMicroseconds(2);
     digitalWrite(trigger_pin, HIGH);
@@ -26,8 +27,9 @@ float read_US(int trigger_pin, int echo_pin) {
 }
 
 bool addWater(uint ml){
+    Serial.printf("adding %dml of water\n", ml);
     Serial.println(CMD_PUMP1_ON);
-    while((read_US(PIN_US1_TRIGGER, PIN_US1_ECHO)*C_DIST_VOL) < ml){delay(250);}
+    while((read_US(PIN_US1_TRIGGER, PIN_US1_ECHO)*C_DIST_VOL) < ml){delay(250); break;}
     Serial.println(CMD_PUMP1_OFF);
     int response = Serial.read();
     if (response != ACK_PUMP1_OFF){
@@ -38,6 +40,7 @@ bool addWater(uint ml){
 }
 
 bool addFertilizer(uint ml){
+    Serial.printf("adding %dml of fertilizer\n", ml);
     Serial.println(CMD_PUMP2_ON);
     delay(ml*C_TIME_VOL);
     Serial.println(CMD_PUMP2_OFF);
@@ -50,9 +53,11 @@ bool addFertilizer(uint ml){
 }
 
 bool checkPH(float ph){
+    Serial.println("reading PH from Sensor");
     int ml = ph * C_PH_VOL;
     float curr_ph;
-    while(1){
+    //while(1){
+    for(int i=0; i<=5; i++){
         curr_ph = read_PH();
         if(curr_ph <= ph) 
             break;
@@ -70,6 +75,7 @@ bool checkPH(float ph){
 }
 
 bool waterPlant(int pumpID){
+    Serial.printf("pumping water mixture into pot %d\n", pumpID);
     Serial.println(pumpID*10+1);                    //CMD_PUMPx_HIGH -> 0x1
     while((read_US(PIN_US2_TRIGGER, PIN_US2_ECHO)*C_DIST_VOL) > 0){delay(250);}
     Serial.println(pumpID*10+0);                    //CMD_PUMPx_LOW -> 0x0
