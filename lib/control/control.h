@@ -14,33 +14,30 @@
     #define PIN_PH_PO 14
 
 
-    #define CMD_PUMP1_OFF 010
-    #define CMD_PUMP2_OFF 020
-    #define CMD_PUMP3_OFF 030
-    #define CMD_PUMP4_OFF 040
-    #define CMD_PUMP5_OFF 050
-    #define CMD_PUMP6_OFF 060
-
-    #define CMD_PUMP1_ON 011
-    #define CMD_PUMP2_ON 021
-    #define CMD_PUMP3_ON 031
-    #define CMD_PUMP4_ON 041
-    #define CMD_PUMP5_ON 051
-    #define CMD_PUMP6_ON 061
-
-    #define ACK_PUMP1_OFF 110
-    #define ACK_PUMP2_OFF 120
-    #define ACK_PUMP3_OFF 130
-    #define ACK_PUMP4_OFF 140
-    #define ACK_PUMP5_OFF 150
-    #define ACK_PUMP6_OFF 160
-
-    #define ACK_PUMP1_ON 111
-    #define ACK_PUMP2_ON 121
-    #define ACK_PUMP3_ON 131
-    #define ACK_PUMP4_ON 141
-    #define ACK_PUMP5_ON 151
-    #define ACK_PUMP6_ON 161
+    #define CMD_PUMP1_OFF "101"
+    #define CMD_PUMP2_OFF "102"
+    #define CMD_PUMP3_OFF "103"
+    #define CMD_PUMP4_OFF "104"
+    #define CMD_PUMP5_OFF "105"
+    #define CMD_PUMP6_OFF "106"
+    #define CMD_PUMP1_ON "111"
+    #define CMD_PUMP2_ON "112"
+    #define CMD_PUMP3_ON "113"
+    #define CMD_PUMP4_ON "114"
+    #define CMD_PUMP5_ON "115"
+    #define CMD_PUMP6_ON "116"
+    #define ACK_PUMP1_OFF "201"
+    #define ACK_PUMP2_OFF "202"
+    #define ACK_PUMP3_OFF "203"
+    #define ACK_PUMP4_OFF "204"
+    #define ACK_PUMP5_OFF "205"
+    #define ACK_PUMP6_OFF "206"
+    #define ACK_PUMP1_ON "211"
+    #define ACK_PUMP2_ON "212"
+    #define ACK_PUMP3_ON "213"
+    #define ACK_PUMP4_ON "214"
+    #define ACK_PUMP5_ON "215"
+    #define ACK_PUMP6_ON "216"
 
     #define C_TIME_VOL 6
     #define C_DIST_VOL 3

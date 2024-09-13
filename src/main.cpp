@@ -366,7 +366,19 @@ bool readFloraDataCharacteristic(BLERemoteService *floraService, bool readBatter
   }
 
   // Create an array for sensors
-  JsonArray sensorJsonArray = jsonDocument.createNestedArray("sensors");
+  // JsonArray sensorJsonArray = jsonDocument.createNestedArray("sensors");
+
+  JsonArray sensorJsonArray;
+  if (jsonDocument.containsKey("sensors"))
+  {
+    // Get existing "sensors" array
+    sensorJsonArray = jsonDocument["sensors"].as<JsonArray>();
+  }
+  else
+  {
+    // Create new "sensors" array if it does not exist
+    sensorJsonArray = jsonDocument.createNestedArray("sensors");
+  }
 
   // Create and add the first sensor object
   
@@ -620,9 +632,10 @@ void setup()
           if(!calculateMeasurementLevel(sensorArray[i].getconductivity(), sensorArray[i].getMinConductivity(), sensorArray[i].getMaxConductivity())){
             addFertilizer(5);
           }
-          checkPH(sensorArray[i].getMinPh());
+          /* checkPH(sensorArray[i].getMinPh());
+          read_PH();
           waterPlant(sensorArray[i].getPot());
-          hibernateAfterIrrigation();
+          hibernateAfterIrrigation(); */
         }
         break;
       }

@@ -53,6 +53,7 @@ float read_PH()
 //   pH = 7 + (voltage-1.5)*(4-7)/(1.7-1.5);
   
   pH = (0.07 * 7 - voltage + 1.5)/0.07;
+  Serial.printf("ph is %d\n", pH);
 
   return pH;
 }
