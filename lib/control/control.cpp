@@ -4,13 +4,24 @@ void emergency_shutdown(){
     digitalWrite(PIN_ARDUINO_PWR, LOW);
 }
 
-void init_US(int trigger_pin, int echo_pin) {
-    // Configure the pins
-    pinMode(trigger_pin, OUTPUT);
-    pinMode(echo_pin, INPUT);
+void initHardware() {
+    // Configure the ultrasonic sensors
+    pinMode(PIN_US1_TRIGGER, OUTPUT);
+    pinMode(PIN_US1_ECHO, INPUT);
+    
+    pinMode(PIN_US2_TRIGGER, OUTPUT);
+    pinMode(PIN_US2_ECHO, INPUT);
+    
+    pinMode(PIN_US3_TRIGGER, OUTPUT);
+    pinMode(PIN_US3_ECHO, INPUT);
+
+    // Configure the PH sensor
+    pinMode(PIN_PH_PO, ANALOG);
+
+    Serial.println("initialized Hardware");
 }
 
-float read_US(int trigger_pin, int echo_pin) {
+float readUltraSonic(int trigger_pin, int echo_pin) {
     Serial.println("reading distance from us sensor");
     digitalWrite(trigger_pin, LOW);
     delayMicroseconds(2);
@@ -30,7 +41,13 @@ float read_US(int trigger_pin, int echo_pin) {
 bool addWater(uint ml){
     Serial.printf("adding %dml of water\n", ml);
     Serial.println(CMD_PUMP_WATER_ON);
-    while((read_US(PIN_US1_TRIGGER, PIN_US1_ECHO)*C_DIST_VOL) < ml){delay(250); break;}
+    for (size_t i = 0; i < 15; i++)
+    {
+        if((readUltraSonic(PIN_US1_TRIGGER, PIN_US1_ECHO)*C_DIST_VOL) >= ml)
+            break;
+
+        delay(250);
+    }
     Serial.println(CMD_PUMP_WATER_OFF);
     /* String response = Serial.read();
     if (response != ACK_PUMP1_OFF){
@@ -78,7 +95,13 @@ bool checkPH(float ph){
 bool waterPlant(int pumpID){
     Serial.printf("pumping water mixture into pot %d\n", pumpID);
     Serial.println(pumpID*10+1);                    //CMD_PUMPx_HIGH -> 0x1
-    while((read_US(PIN_US2_TRIGGER, PIN_US2_ECHO)*C_DIST_VOL) > 0){delay(250);}
+    for (size_t i = 0; i < 15; i++)
+    {
+        if((readUltraSonic(PIN_US1_TRIGGER, PIN_US1_ECHO)*C_DIST_VOL) <= 10)
+            break;
+
+        delay(250);
+    }
     Serial.println(pumpID*10+0);                    //CMD_PUMPx_LOW -> 0x0
     /* int response = Serial.read();
     if (response != (100+pumpID*10+0)){             //ACK_PUMPx_LOW -> 1x0 
@@ -86,4 +109,16 @@ bool waterPlant(int pumpID){
         return false;
     } */
     return true;
+}
+
+int checkWaterLevel(){
+    return (readUltraSonic(PIN_US2_TRIGGER, PIN_US2_ECHO)*C_DIST_VOL);
+}
+
+int checkAcidLevel(){
+
+}
+
+int checkFertilizerLevel(){
+
 }

@@ -563,6 +563,9 @@ void setup()
   // create a hibernate task in case something gets stuck
   xTaskCreate(delayedHibernate, "hibernate", 4096, NULL, 1, &hibernateTaskHandle);
 
+  // initialize hardware
+  initHardware();
+
   // create device Json Document
   DynamicJsonDocument deviceJson(deviceCapacity);
 

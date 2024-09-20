@@ -9,8 +9,8 @@
     #define PIN_US1_ECHO 13
     #define PIN_US2_TRIGGER 33
     #define PIN_US2_ECHO 25
-    #define PIN_US2_TRIGGER 27
-    #define PIN_US2_ECHO 26
+    #define PIN_US3_TRIGGER 27
+    #define PIN_US3_ECHO 26
     #define PIN_PH_PO 14
 
 
@@ -48,11 +48,14 @@
 
 
     void emergency_shutdown();
-    void init_US(int trigger_pin, int echo_pin);
-    float read_US(int trigger_pin, int echo_pin);
+    void initHardware();
+    float readUltraSonic(int trigger_pin, int echo_pin);
     bool addWater(uint ml);
     bool addFertilizer(uint ml);
     bool checkPH(float ph);
     bool waterPlant(int pumpID);
+    int checkWaterLevel();
+    int checkFertilizerLevel();
+    int checkAcidLevel();
 
 #endif
