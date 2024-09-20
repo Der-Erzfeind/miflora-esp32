@@ -530,6 +530,10 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
   deviceCount = sensor_conf_a.size();
   Serial.printf("Received parameters for %d sensors\n", deviceCount);
+  if(deviceCount == 0){
+    Serial.println("no sensors, going to sleep");
+    hibernate();
+  }
 
   // Iterate through the array
   for (int i = 0; i < deviceCount; i++) {

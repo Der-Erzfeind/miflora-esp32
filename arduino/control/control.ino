@@ -1,52 +1,29 @@
-#define CMD_PUMP1_OFF "101"
-#define CMD_PUMP2_OFF "102"
-#define CMD_PUMP3_OFF "103"
-#define CMD_PUMP4_OFF "104"
-#define CMD_PUMP5_OFF "105"
-#define CMD_PUMP6_OFF "106"
-#define CMD_PUMP1_ON "111"
-#define CMD_PUMP2_ON "112"
-#define CMD_PUMP3_ON "113"
-#define CMD_PUMP4_ON "114"
-#define CMD_PUMP5_ON "115"
-#define CMD_PUMP6_ON "116"
-#define ACK_PUMP1_OFF "201"
-#define ACK_PUMP2_OFF "202"
-#define ACK_PUMP3_OFF "203"
-#define ACK_PUMP4_OFF "204"
-#define ACK_PUMP5_OFF "205"
-#define ACK_PUMP6_OFF "206"
-#define ACK_PUMP1_ON "211"
-#define ACK_PUMP2_ON "212"
-#define ACK_PUMP3_ON "213"
-#define ACK_PUMP4_ON "214"
-#define ACK_PUMP5_ON "215"
-#define ACK_PUMP6_ON "216"
+#include "../lib/control/control.h"
 
 
-// Define the pins to control
-const int pin1 = 2;
-const int pin2 = 3;
-const int pin3 = 4;
-const int pin4 = 7;
-const int pin5 = 4;
-const int pin6 = 5;
+// Define the pumps to cON"trol
+const int pump1 = 2;
+const int pump2 = 3;
+const int pump3 = 4;
+const int pump4 = 7;
+const int pump5 = 4;
+const int pump6 = 5;
 
 void setup() {
 
-  pinMode(pin1, OUTPUT);
-  pinMode(pin2, OUTPUT);
-  pinMode(pin3, OUTPUT);
-  pinMode(pin4, OUTPUT);
-  pinMode(pin5, OUTPUT);
-  pinMode(pin6, OUTPUT);
+  pinMode(pump1, OUTPUT);
+  pinMode(pump2, OUTPUT);
+  pinMode(pump3, OUTPUT);
+  pinMode(pump4, OUTPUT);
+  pinMode(pump5, OUTPUT);
+  pinMode(pump6, OUTPUT);
 
-  digitalWrite(pin1, LOW);
-  digitalWrite(pin2, LOW);
-  digitalWrite(pin3, LOW);
-  digitalWrite(pin4, LOW);
-  digitalWrite(pin5, LOW);
-  digitalWrite(pin6, LOW);
+  digitalWrite(pump1, LOW);
+  digitalWrite(pump2, LOW);
+  digitalWrite(pump3, LOW);
+  digitalWrite(pump4, LOW);
+  digitalWrite(pump5, LOW);
+  digitalWrite(pump6, LOW);
 
   Serial.begin(115200);
 }
@@ -71,69 +48,69 @@ void loop() {
   }
 }
 
-// Function to handle received commands
+// FunctiON" to handle received commands
 
 void handleCommand(String command) {
       Serial.println(command);
 
-      if(command ==  CMD_PUMP1_ON){// Turn pin 2 ON
-        digitalWrite(pin1, HIGH);
-        Serial.println(ACK_PUMP1_ON);
+      if(command ==  "CMD_PUMP1_ON"){// Turn pump 2 ON"
+        digitalWrite(pump1, HIGH);
+        Serial.println("ACK_PUMP1_ON");
       }
 
-      else if(command ==  CMD_PUMP1_OFF){ // Turn pin 2 OFF
-        digitalWrite(pin1, LOW);
-        Serial.println(ACK_PUMP1_OFF);
+      else if(command ==  "CMD_PUMP1_OFF"){ // Turn pump 2 OFF"
+        digitalWrite(pump1, LOW);
+        Serial.println("ACK_PUMP1_OFF");
       }
 
-      else if(command ==  CMD_PUMP2_ON){// Turn pin 3 ON
-        digitalWrite(pin2, HIGH);
-        Serial.println(ACK_PUMP2_ON);
+      else if(command ==  "CMD_PUMP2_ON"){// Turn pump 3 ON"
+        digitalWrite(pump2, HIGH);
+        Serial.println("ACK_PUMP2_ON");
       }
 
-      else if(command ==  CMD_PUMP2_OFF){ // Turn pin 3 OFF
-        digitalWrite(pin2, LOW);
-        Serial.println(ACK_PUMP2_OFF);
+      else if(command ==  "CMD_PUMP2_OFF"){ // Turn pump 3 OFF"
+        digitalWrite(pump2, LOW);
+        Serial.println("ACK_PUMP2_OFF");
       }
 
-      else if(command ==  CMD_PUMP3_ON){// Turn pin 4 ON
-        digitalWrite(pin3, HIGH);
-        Serial.println(ACK_PUMP3_ON);
+      else if(command ==  "CMD_PUMP3_ON"){// Turn pump 4 ON"
+        digitalWrite(pump3, HIGH);
+        Serial.println("ACK_PUMP3_ON");
       }
 
-      else if(command ==  CMD_PUMP3_OFF){ // Turn pin 4 OFF
-        digitalWrite(pin3, LOW);
-        Serial.println(ACK_PUMP3_OFF);
+      else if(command ==  "CMD_PUMP3_OFF"){ // Turn pump 4 OFF"
+        digitalWrite(pump3, LOW);
+        Serial.println("ACK_PUMP3_OFF");
       }
 
-      else if(command ==  CMD_PUMP4_ON){// Turn pin 5 ON
-        digitalWrite(pin4, HIGH);
-        Serial.println(ACK_PUMP4_ON);
+      else if(command ==  "CMD_PUMP4_ON"){// Turn pump 5 ON"
+        digitalWrite(pump4, HIGH);
+        Serial.println("ACK_PUMP4_ON");
       }
 
-      else if(command ==  CMD_PUMP4_OFF){ // Turn pin 5 OFF
-        digitalWrite(pin4, LOW);
-        Serial.println(ACK_PUMP4_OFF);
+      else if(command ==  "CMD_PUMP4_OFF"){ // Turn pump 5 OFF"
+        digitalWrite(pump4, LOW);
+        Serial.println("ACK_PUMP4_OFF");
       }
 
-      else if(command ==  CMD_PUMP5_ON){// Turn pin 6 ON
-        digitalWrite(pin5, HIGH);
-        Serial.println(ACK_PUMP5_ON);
+      else if(command ==  "CMD_PUMP5_ON"){// Turn pump 6 ON"
+        digitalWrite(pump5, HIGH);
+        Serial.println("ACK_PUMP5_ON");
       }
 
-      else if(command ==  CMD_PUMP5_OFF){ // Turn pin 6 OFF
-        digitalWrite(pin5, LOW);
-        Serial.println(ACK_PUMP5_OFF);
+      else if(command ==  "CMD_PUMP5_OFF"){ // Turn pump 6 OFF"
+        digitalWrite(pump5, LOW);
+        Serial.println("ACK_PUMP5_OFF");
       }
 
-      else if(command ==  CMD_PUMP6_ON){// Turn pin 7 ON
-        digitalWrite(pin6, HIGH);
-        Serial.println(ACK_PUMP6_ON);
+      else if(command ==  "CMD_PUMP6_ON"){// Turn pump 7 ON"
+        digitalWrite(pump6, HIGH);
+        Serial.println("ACK_PUMP6_ON");
       }
 
-      else if(command ==  CMD_PUMP6_OFF){ // Turn pin 7 OFF
-        digitalWrite(pin6, LOW);
-        Serial.println(ACK_PUMP6_OFF);
+      else if(command ==  "CMD_PUMP6_OFF"){ // Turn pump 7 OFF"
+        digitalWrite(pump6, LOW);
+        Serial.println("ACK_PUMP6_OFF");
       }
 
       //else

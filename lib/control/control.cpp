@@ -29,9 +29,9 @@ float read_US(int trigger_pin, int echo_pin) {
 
 bool addWater(uint ml){
     Serial.printf("adding %dml of water\n", ml);
-    Serial.println(CMD_PUMP1_ON);
+    Serial.println(CMD_PUMP_WATER_ON);
     while((read_US(PIN_US1_TRIGGER, PIN_US1_ECHO)*C_DIST_VOL) < ml){delay(250); break;}
-    Serial.println(CMD_PUMP1_OFF);
+    Serial.println(CMD_PUMP_WATER_OFF);
     /* String response = Serial.read();
     if (response != ACK_PUMP1_OFF){
         emergency_shutdown();
@@ -42,9 +42,9 @@ bool addWater(uint ml){
 
 bool addFertilizer(uint ml){
     Serial.printf("adding %dml of fertilizer\n", ml);
-    Serial.println(CMD_PUMP2_ON);
+    Serial.println(CMD_PUMP_FERTILIZER_ON);
     delay(ml*C_TIME_VOL);
-    Serial.println(CMD_PUMP2_OFF);
+    Serial.println(CMD_PUMP_FERTILIZER_OFF);
     /* int response = Serial.read();
     if (response != ACK_PUMP2_OFF){
         emergency_shutdown();
@@ -62,9 +62,9 @@ bool checkPH(float ph){
         curr_ph = read_PH();
         if(curr_ph <= ph) 
             break;
-        Serial.println(CMD_PUMP3_ON);
+        Serial.println(CMD_PUMP_ACID_ON);
         delay(ml*C_TIME_VOL);
-        Serial.println(CMD_PUMP3_OFF);
+        Serial.println(CMD_PUMP_ACID_OFF);
         int response = Serial.read();
         /* if (response != ACK_PUMP3_OFF){
             emergency_shutdown();
