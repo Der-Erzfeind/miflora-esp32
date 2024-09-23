@@ -41,12 +41,9 @@ float readUltraSonic(int trigger_pin, int echo_pin) {
 bool addWater(uint ml){
     Serial.printf("adding %dml of water\n", ml);
     Serial.println(CMD_PUMP_WATER_ON);
-    for (size_t i = 0; i < 15; i++)
-    {
-        if((readUltraSonic(PIN_US1_TRIGGER, PIN_US1_ECHO)*C_DIST_VOL) >= ml)
-            break;
-
-        delay(250);
+    String response = Serial.read();
+    if (response != ACK_PUMP_WATER_ON){
+        return false;
     }
     Serial.println(CMD_PUMP_WATER_OFF);
     /* String response = Serial.read();
@@ -94,7 +91,7 @@ bool checkPH(float ph){
 
 bool waterPlant(int pumpID){
     Serial.printf("pumping water mixture into pot %d\n", pumpID);
-    Serial.println(pumpID*10+1);                    //CMD_PUMPx_HIGH -> 0x1
+    Serial.println(CMD_PUMP_POT_ON(pumpID));                    //CMD_PUMPx_HIGH -> 0x1
     for (size_t i = 0; i < 15; i++)
     {
         if((readUltraSonic(PIN_US1_TRIGGER, PIN_US1_ECHO)*C_DIST_VOL) <= 10)
@@ -102,7 +99,7 @@ bool waterPlant(int pumpID){
 
         delay(250);
     }
-    Serial.println(pumpID*10+0);                    //CMD_PUMPx_LOW -> 0x0
+    Serial.println(CMD_PUMP_POT_OFF(pumpID));                    //CMD_PUMPx_LOW -> 0x0
     /* int response = Serial.read();
     if (response != (100+pumpID*10+0)){             //ACK_PUMPx_LOW -> 1x0 
         emergency_shutdown();

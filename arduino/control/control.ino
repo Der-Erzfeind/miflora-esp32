@@ -1,12 +1,12 @@
-#include "../lib/control/control.h"
+#include "/home/jonas/SmartGrow/repo/miflora-esp32/lib/control/control.h"
 
 
 // Define the pumps to cON"trol
-const int pump1 = 2;
-const int pump2 = 3;
-const int pump3 = 4;
+const int pump1 = 3;
+const int pump2 = 4;
+const int pump3 = 2;
 const int pump4 = 7;
-const int pump5 = 4;
+const int pump5 = 6;
 const int pump6 = 5;
 
 void setup() {

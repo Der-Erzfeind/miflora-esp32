@@ -637,7 +637,7 @@ void setup()
         if(!calculateMeasurementLevel(sensorArray[i].getmoisture(), sensorArray[i].getMinMoisture(), sensorArray[i].getMaxMoisture())){
           addWater(200);
           if(!calculateMeasurementLevel(sensorArray[i].getconductivity(), sensorArray[i].getMinConductivity(), sensorArray[i].getMaxConductivity())){
-            addFertilizer(5);
+            //addFertilizer(5);
           }
           /* checkPH(sensorArray[i].getMinPh());
           read_PH();
