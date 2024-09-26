@@ -46,7 +46,7 @@
     #define ACK_PUMP_FERTILIZER_ON "ACK_PUMP5_ON"
     #define ACK_PUMP_ACID_ON "ACK_PUMP6_ON"
 
-    #define C_TIME_VOL 0.05
+    #define C_TIME_VOL 0.05 * 1000
     #define C_DIST_VOL 3
     #define C_PH_VOL 4
 
@@ -61,5 +61,6 @@
     int checkWaterLevel();
     int checkFertilizerLevel();
     int checkAcidLevel();
+    String arduinoResponse();
 
 #endif

@@ -41,29 +41,30 @@ float readUltraSonic(int trigger_pin, int echo_pin) {
 bool addWater(uint ml){
     Serial.printf("adding %dml of water\n", ml);
     Serial.println(CMD_PUMP_WATER_ON);
-    String response = Serial.read();
-    if (response != ACK_PUMP_WATER_ON){
+    if (arduinoResponse() != ACK_PUMP_WATER_ON){
         return false;
     }
+    delay(ml * C_TIME_VOL);
     Serial.println(CMD_PUMP_WATER_OFF);
-    /* String response = Serial.read();
-    if (response != ACK_PUMP1_OFF){
+    if (arduinoResponse() != ACK_PUMP_WATER_OFF){
         emergency_shutdown();
         return false;
-    } */
+    }
     return true;
 }
 
 bool addFertilizer(uint ml){
     Serial.printf("adding %dml of fertilizer\n", ml);
     Serial.println(CMD_PUMP_FERTILIZER_ON);
+    if(arduinoResponse() != ACK_PUMP_FERTILIZER_ON){
+        return false;
+    }
     delay(ml*C_TIME_VOL);
     Serial.println(CMD_PUMP_FERTILIZER_OFF);
-    /* int response = Serial.read();
-    if (response != ACK_PUMP2_OFF){
+    if(arduinoResponse() != ACK_PUMP_FERTILIZER_OFF){
         emergency_shutdown();
         return false;
-    } */
+    }
     return true;
 }
 
@@ -71,20 +72,21 @@ bool checkPH(float ph){
     Serial.println("reading PH from Sensor");
     int ml = ph * C_PH_VOL;
     float curr_ph;
-    //while(1){
     for(int i=0; i<=5; i++){
         curr_ph = read_PH();
         if(curr_ph <= ph) 
             break;
         Serial.println(CMD_PUMP_ACID_ON);
+        if(arduinoResponse() != ACK_PUMP_ACID_ON){
+            return false;
+        }
         delay(ml*C_TIME_VOL);
         Serial.println(CMD_PUMP_ACID_OFF);
-        int response = Serial.read();
-        /* if (response != ACK_PUMP3_OFF){
+        if(arduinoResponse() != ACK_PUMP_ACID_OFF){
             emergency_shutdown();
             return false;
         }
-        delay(5 * 60000); */
+        delay(1000 * 300);
     }
     return true;
 }
@@ -92,6 +94,9 @@ bool checkPH(float ph){
 bool waterPlant(int pumpID){
     Serial.printf("pumping water mixture into pot %d\n", pumpID);
     Serial.println(CMD_PUMP_POT_ON(pumpID));                    //CMD_PUMPx_HIGH -> 0x1
+    if(arduinoResponse() != CMD_PUMP_POT_ON(pumpID)){
+        return false;
+    }
     for (size_t i = 0; i < 15; i++)
     {
         if((readUltraSonic(PIN_US1_TRIGGER, PIN_US1_ECHO)*C_DIST_VOL) <= 10)
@@ -100,11 +105,10 @@ bool waterPlant(int pumpID){
         delay(250);
     }
     Serial.println(CMD_PUMP_POT_OFF(pumpID));                    //CMD_PUMPx_LOW -> 0x0
-    /* int response = Serial.read();
-    if (response != (100+pumpID*10+0)){             //ACK_PUMPx_LOW -> 1x0 
+    if(arduinoResponse() != CMD_PUMP_POT_OFF(pumpID)){
         emergency_shutdown();
         return false;
-    } */
+    }
     return true;
 }
 
@@ -118,4 +122,20 @@ int checkAcidLevel(){
 
 int checkFertilizerLevel(){
 
+}
+
+String arduinoResponse(){
+    String response;
+
+    while (Serial.available() > 0) {
+        char inChar = Serial.read();   
+
+        if (inChar != '\n') { 
+        response += inChar;
+        } else {
+        response.trim();
+        }
+    }
+
+    return response;
 }
