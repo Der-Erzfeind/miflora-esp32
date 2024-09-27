@@ -561,7 +561,7 @@ void setup()
   bootCount++;
 
   // create a hibernate task in case something gets stuck
-  xTaskCreate(delayedHibernate, "hibernate", 4096, NULL, 1, &hibernateTaskHandle);
+  //xTaskCreate(delayedHibernate, "hibernate", 4096, NULL, 1, &hibernateTaskHandle);
 
   // initialize hardware
   initHardware();
@@ -635,16 +635,22 @@ void setup()
       if (processFloraDevice(readBattery, retryCount, sensorJson, sensorArray[i]))
       {
         if(!calculateMeasurementLevel(sensorArray[i].getmoisture(), sensorArray[i].getMinMoisture(), sensorArray[i].getMaxMoisture())){
-          addWater(200);
-          if(!calculateMeasurementLevel(sensorArray[i].getconductivity(), sensorArray[i].getMinConductivity(), sensorArray[i].getMaxConductivity())){
-            //addFertilizer(5);
+          if(!addWater(200)){
+            Serial.println("adding Water failed!");
+            Serial.println("aborting irrigation");
+            hibernate();
           }
-          /* checkPH(sensorArray[i].getMinPh());
-          read_PH();
+          if(!calculateMeasurementLevel(sensorArray[i].getconductivity(), sensorArray[i].getMinConductivity(), sensorArray[i].getMaxConductivity())){
+            if(!addFertilizer(5)){
+              Serial.println("adding Fertilizer failed!");
+            }
+          }
+          if(!correctPH(sensorArray[i].getMinPh())){
+            Serial.println("correcting PH failed!");
+          }
           waterPlant(sensorArray[i].getPot());
-          hibernateAfterIrrigation(); */
+          hibernateAfterIrrigation();
         }
-        break;
       }
       delay(3000); // wait for another try
     }
@@ -668,7 +674,7 @@ void setup()
   disconnectWifi();
 
   // delete emergency hibernate task
-  vTaskDelete(hibernateTaskHandle);
+  //vTaskDelete(hibernateTaskHandle);
 
   // go to sleep now
   hibernate();
