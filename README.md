@@ -1,19 +1,23 @@
-# Xiaomi Flora Plant sensors [![Build Status](https://travis-ci.com/RaymondMouthaan/miflora-esp32.svg?branch=master)](https://travis-ci.com/github/RaymondMouthaan/miflora-esp32)
+# Smartgrow Control System
 
-This [PlatformIO](https://platformio.org) project implements an ESP32 BLE client for Xiaomi Flora Plant sensors, pushing the measurements in json format to a MQTT broker.
+Dieses [PlatformIO](https://platformio.org) Projekt basiert auf dem [miflora-esp32](https://github.com/RaymondMouthaan/miflora-esp32) Projekt von [@RaymondMouthaan](https://github.com/RaymondMouthaan). 
+
+Der ESP32 Controller bezieht Sollwerte für die System vorhandenen Pflanzen, sowie die Mac Adressen der Xiaomi MiFlora Sensoren über MQTT vom [Server](https://github.com/Der-Erzfeind/SmartGrow/tree/main/RaspberryPI). Anschließend werden die Sensoren ausgelesen und bei Bedarf Kommandos zum Ansteuern der Pumpen an den Arduino Nano gesendet. Abschließend werden die Messdaten über MQTT zurück an der Server gesendet.
 
 ![xiaomi-flora](xiaomi-miflora.png)
 
 ## Features
 
-Base on the great work of @sidddy and @jvyoralek (and all other contributors), this project adds:
+Das Basisprojekt von @RaymondMouthaan wurde wie folgt verändert:
 
-- Support for multiple Miflora sensors with friendly named topics
-- Payloads in json format
-- Device (Wifi) status and lwt (last will and testament)
-- Seperate configurable (sub) topics
-- Measurement levels (configurable by min, max values)
-- Battery low status and battery level (configurable by thresholds)
+- Dynamische Zuweisung der Elemente der Elemente der Sensor Klasse
+- Bezug der Parameter der Sensor Klasse vom Server über MQTT
+- callback() Funktion zum Parsen der erhaltenen Parameter hinzugefügt
+- MQTT Topics für Kommunikation mit Server geändert
+- Klasse Box mit Elementen für Füllstände hinzugefügt
+- control.cpp mit Funktionen zum           hinzugefügt
+- control.h 
+- ph_sensor.cpp und ph_sensor.h
 
 __Note : tested with a maximum of 8 Miflora sensors configured, however the ESP32 for some unknown reason get's stuck sometimes. With 4 Miflora sensors configured the ESP32 looks stable and therefore it's advisable to configure a maximum of 4 Miflora sensors per ESP32.__
 
