@@ -1,8 +1,8 @@
 #include <Arduino.h>
+#include "ph_sensor.h"
 
-const int pHSensorPin = 34; // ADC1 Channel 6 is GPIO34
-float voltage, pH;
-int buffer_arr[9];
+
+
 
 float calibration_value = 0.15;
 
@@ -29,18 +29,14 @@ float findMedian(int arr[], int n) {
     }
 }
 
-void init_PH()
-{
-  pinMode(pHSensorPin, ANALOG);
-  analogReadResolution(12); // Set ADC resolution to 12 bits
-}
-
 float read_PH()
 {
-
+  float voltage, pH;
+  int buffer_arr[9];
+  
   for(int i=0;i<9;i++)
   {
-    buffer_arr[i]=analogRead(pHSensorPin);
+    buffer_arr[i]=analogRead(PIN_PH_PO);
     delay(30);
   }
 
@@ -53,7 +49,7 @@ float read_PH()
 //   pH = 7 + (voltage-1.5)*(4-7)/(1.7-1.5);
   
   pH = (0.07 * 7 - voltage + 1.5)/0.07;
-  Serial.printf("ph is %d\n", pH);
+  Serial.printf("ph is %f\n", pH);
 
   return pH;
 }

@@ -541,12 +541,12 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
     sensorArray[i].setMac(sensorData["Mac"]);
     sensorArray[i].setPot(sensorData["Pot"]);
-    sensorArray[i].setMinPh(sensorData["MinPh"]);
-    sensorArray[i].setMaxPh(sensorData["MaxPh"]);
     sensorArray[i].setMinMoisture(sensorData["MinMoisture"]);
     sensorArray[i].setMaxMoisture(sensorData["MaxMoisture"]);
     sensorArray[i].setMinConductivity(sensorData["MinConductivity"]);
     sensorArray[i].setMaxConductivity(sensorData["MaxConductivity"]);
+    sensorArray[i].setMinPh(sensorData["MinPh"]);
+    sensorArray[i].setMaxPh(sensorData["MaxPh"]);
   }
 }
 
@@ -603,6 +603,9 @@ void setup()
 
   client.unsubscribe(parameterReceiveTopic.c_str());
 
+  disconnectMqtt();
+  disconnectWifi();
+
   Serial.println("Initialize BLE client...");
   BLEDevice::init("");
   BLEDevice::setPower(ESP_PWR_LVL_P9);
@@ -614,10 +617,10 @@ void setup()
 
     // Add main data
   sensorJson["Mac"] = WiFi.macAddress();
-  sensorJson["volmix"] = 60;
-  sensorJson["volwater"] = 20;
-  sensorJson["volfertilizer"] = 60;
-  sensorJson["volacid"] = 60;
+  //sensorJson["volmix"] = 60;
+  sensorJson["volwater"] = readUltraSonic(PIN_US_WATER_TRIGGER, PIN_US_WATER_ECHO);
+  sensorJson["volfertilizer"] = readUltraSonic(PIN_US_FERTILIZER_TRIGGER, PIN_US_FERTILIZER_ECHO);
+  sensorJson["volacid"] = readUltraSonic(PIN_US_ACID_TRIGGER, PIN_US_ACID_ECHO);
 
   // process devices
   for (int i = 0; i < deviceCount; i++)
@@ -634,6 +637,21 @@ void setup()
       // create sensor topic
       if (processFloraDevice(readBattery, retryCount, sensorJson, sensorArray[i]))
       {
+        Serial.printf("MinMoist: %d \n", sensorArray[i].getMinMoisture());
+        Serial.printf("MaxMoist: %d \n", sensorArray[i].getMaxMoisture());
+        Serial.printf("MinCond: %d \n", sensorArray[i].getMinConductivity());
+        Serial.printf("MaxCond: %d \n", sensorArray[i].getMaxConductivity());
+        Serial.printf("MinPH: %d \n", sensorArray[i].getMinPh());
+        Serial.printf("MaxPH: %d \n", sensorArray[i].getMaxPh());
+        Serial.printf("temp: %d \n", sensorArray[i].gettemperature());
+        Serial.printf("ph: %d \n", sensorArray[i].getph());
+        Serial.printf("moisture: %d \n", sensorArray[i].getmoisture());
+        Serial.printf("light: %d \n", sensorArray[i].getlight());
+        Serial.printf("conductivity: %d \n", sensorArray[i].getconductivity());
+        Serial.printf("battery: %d \n", sensorArray[i].getbattery());
+
+
+        
         if(!calculateMeasurementLevel(sensorArray[i].getmoisture(), sensorArray[i].getMinMoisture(), sensorArray[i].getMaxMoisture())){
           if(!addWater(200)){
             Serial.println("adding Water failed!");
@@ -641,11 +659,13 @@ void setup()
             hibernate();
           }
           if(!calculateMeasurementLevel(sensorArray[i].getconductivity(), sensorArray[i].getMinConductivity(), sensorArray[i].getMaxConductivity())){
-            if(!addFertilizer(5)){
+                    Serial.println(sensorArray[i].getconductivity());
+        Serial.println(calculateMeasurementLevel(sensorArray[i].getconductivity(), sensorArray[i].getMinConductivity(), sensorArray[i].getMaxConductivity()));
+            if(!addFertilizer(10)){
               Serial.println("adding Fertilizer failed!");
             }
           }
-          if(!correctPH(sensorArray[i].getMinPh())){
+          if(!correctPH(sensorArray[i].getMaxPh())){
             Serial.println("correcting PH failed!");
           }
           waterPlant(sensorArray[i].getPot());
@@ -656,6 +676,9 @@ void setup()
     }
     delay(2000); // wait for next sensor
   }
+
+  connectWifi(deviceJson);
+  connectMqtt();
   
   char payload[sensorCapacity];
   serializeJson(sensorJson, payload);

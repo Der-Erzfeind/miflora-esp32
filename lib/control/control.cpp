@@ -1,4 +1,5 @@
 #include "control.h"
+#include "ph_sensor.h"
 
 void emergency_shutdown(){
     digitalWrite(PIN_ARDUINO_PWR, LOW);
@@ -6,17 +7,18 @@ void emergency_shutdown(){
 
 void initHardware() {
     // Configure the ultrasonic sensors
-    pinMode(PIN_US1_TRIGGER, OUTPUT);
-    pinMode(PIN_US1_ECHO, INPUT);
+    pinMode(PIN_US_WATER_TRIGGER, OUTPUT);
+    pinMode(PIN_US_WATER_ECHO, INPUT);
     
-    pinMode(PIN_US2_TRIGGER, OUTPUT);
-    pinMode(PIN_US2_ECHO, INPUT);
+    pinMode(PIN_US_FERTILIZER_TRIGGER, OUTPUT);
+    pinMode(PIN_US_FERTILIZER_ECHO, INPUT);
     
-    pinMode(PIN_US3_TRIGGER, OUTPUT);
-    pinMode(PIN_US3_ECHO, INPUT);
+    pinMode(PIN_US_ACID_TRIGGER, OUTPUT);
+    pinMode(PIN_US_ACID_ECHO, INPUT);
 
     // Configure the PH sensor
     pinMode(PIN_PH_PO, ANALOG);
+    analogReadResolution(12); // Set ADC resolution to 12 bits
 
     Serial.println("initialized Hardware");
 }
@@ -76,7 +78,8 @@ bool addFertilizer(int ml){
 
 bool correctPH(float ph){
     Serial.println("reading PH from Sensor");
-    int ml = ph * C_PH_VOL;
+    //int ml = ph * C_PH_VOL;
+    int ml = 10;
     float curr_ph;
     for(int i=0; i<=5; i++){
         curr_ph = read_PH();
@@ -95,45 +98,29 @@ bool correctPH(float ph){
             emergency_shutdown();
             return false;
         } */
-        delay(1000 * 300);
+        delay(1000 * 10);
     }
     return true;
 }
 
 bool waterPlant(int pumpID){
     Serial.printf("pumping water mixture into pot %d\n", pumpID);
-    Serial.println(CMD_PUMP_POT_ON(pumpID));
+    Serial.printf("CMD_PUMP%d_ON\n", pumpID);
     /* Serial.flush();
     delay(1000);
     if(arduinoResponse() != CMD_PUMP_POT_ON(pumpID)){
         Serial.println(CMD_PUMP_POT_OFF(pumpID));
         return false;
     } */
-    for (size_t i = 0; i < 15; i++)
-    {
-        if((readUltraSonic(PIN_US1_TRIGGER, PIN_US1_ECHO)*C_DIST_VOL) <= 10)
-            break;
+    delay(200 * C_TIME_VOL);
+    //Serial.println(CMD_PUMP_POT_OFF(pumpID));                    //CMD_PUMPx_LOW -> 0x0
+    Serial.printf("CMD_PUMP%d_OFF\n", pumpID);
 
-        delay(250);
-    }
-    Serial.println(CMD_PUMP_POT_OFF(pumpID));                    //CMD_PUMPx_LOW -> 0x0
     /* if(arduinoResponse() != CMD_PUMP_POT_OFF(pumpID)){
         emergency_shutdown();
         return false;
     } */
     return true;
-}
-
-int checkWaterLevel(){
-    return (readUltraSonic(PIN_US2_TRIGGER, PIN_US2_ECHO)*C_DIST_VOL);
-}
-
-int checkAcidLevel(){
-
-}
-
-int checkFertilizerLevel(){
-
 }
 
 String arduinoResponse(){
