@@ -258,7 +258,7 @@ bool readFloraBatteryCharacteristic(BLERemoteService *floraService, Sensor &sens
 
   // read characteristic value
   Serial.println("- Read value from characteristic");
-  std::string value;
+  std::string value; 
   try
   {
     value = floraCharacteristic->readValue();
@@ -277,7 +277,7 @@ bool readFloraBatteryCharacteristic(BLERemoteService *floraService, Sensor &sens
   return true;
 }
 
-bool readFloraDataCharacteristic(BLERemoteService *floraService, bool readBattery, ArduinoJson::JsonDocument &jsonDocument, Sensor sensor)
+bool readFloraDataCharacteristic(BLERemoteService *floraService, bool readBattery, ArduinoJson::JsonDocument &jsonDocument, Sensor &sensor)
 {
   BLERemoteCharacteristic *floraCharacteristic = nullptr;
 
@@ -395,7 +395,7 @@ bool readFloraDataCharacteristic(BLERemoteService *floraService, bool readBatter
 }
 
 
-bool processFloraService(BLERemoteService *floraService, bool readBattery, ArduinoJson::JsonDocument &jsonDocument, Sensor sensor)
+bool processFloraService(BLERemoteService *floraService, bool readBattery, ArduinoJson::JsonDocument &jsonDocument, Sensor &sensor)
 {
   // set device in data mode
   if (!forceFloraServiceDataMode(floraService))
@@ -637,30 +637,28 @@ void setup()
       // create sensor topic
       if (processFloraDevice(readBattery, retryCount, sensorJson, sensorArray[i]))
       {
+
         Serial.printf("MinMoist: %d \n", sensorArray[i].getMinMoisture());
         Serial.printf("MaxMoist: %d \n", sensorArray[i].getMaxMoisture());
         Serial.printf("MinCond: %d \n", sensorArray[i].getMinConductivity());
         Serial.printf("MaxCond: %d \n", sensorArray[i].getMaxConductivity());
-        Serial.printf("MinPH: %d \n", sensorArray[i].getMinPh());
-        Serial.printf("MaxPH: %d \n", sensorArray[i].getMaxPh());
-        Serial.printf("temp: %d \n", sensorArray[i].gettemperature());
-        Serial.printf("ph: %d \n", sensorArray[i].getph());
+        Serial.printf("MinPH: %f \n", sensorArray[i].getMinPh());
+        Serial.printf("MaxPH: %f \n", sensorArray[i].getMaxPh());
+        Serial.printf("temp: %f \n", sensorArray[i].gettemperature());
+        Serial.printf("ph: %f \n", sensorArray[i].getph());
         Serial.printf("moisture: %d \n", sensorArray[i].getmoisture());
         Serial.printf("light: %d \n", sensorArray[i].getlight());
         Serial.printf("conductivity: %d \n", sensorArray[i].getconductivity());
         Serial.printf("battery: %d \n", sensorArray[i].getbattery());
 
-
         
-        if(!calculateMeasurementLevel(sensorArray[i].getmoisture(), sensorArray[i].getMinMoisture(), sensorArray[i].getMaxMoisture())){
+        if(sensorArray[i].getmoisture() <= sensorArray[i].getMinMoisture()){
           if(!addWater(200)){
             Serial.println("adding Water failed!");
             Serial.println("aborting irrigation");
             hibernate();
           }
-          if(!calculateMeasurementLevel(sensorArray[i].getconductivity(), sensorArray[i].getMinConductivity(), sensorArray[i].getMaxConductivity())){
-                    Serial.println(sensorArray[i].getconductivity());
-        Serial.println(calculateMeasurementLevel(sensorArray[i].getconductivity(), sensorArray[i].getMinConductivity(), sensorArray[i].getMaxConductivity()));
+          if(sensorArray[i].getconductivity() <= sensorArray[i].getMinConductivity()){
             if(!addFertilizer(10)){
               Serial.println("adding Fertilizer failed!");
             }
@@ -671,6 +669,8 @@ void setup()
           waterPlant(sensorArray[i].getPot());
           hibernateAfterIrrigation();
         }
+
+       break;
       }
       delay(3000); // wait for another try
     }
