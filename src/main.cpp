@@ -88,6 +88,15 @@ void callback(char* topic, byte* payload, unsigned int length);
 
 void connectWifi(ArduinoJson::JsonDocument &jsonDocument)
 {
+  
+  IPAddress local_IP(10, 42, 0, 100);  // Change to your desired IP
+  IPAddress gateway(10, 42, 0, 1);     // Your router's gateway
+  IPAddress subnet(255, 255, 255, 0);    // Subnet mask
+
+  if (!WiFi.config(local_IP, gateway, subnet)) {
+      Serial.println("STA Failed to configure");
+    }
+
   Serial.println("Connecting to WiFi...");
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
@@ -659,7 +668,7 @@ void setup()
             hibernate();
           }
           if(sensorArray[i].getconductivity() <= sensorArray[i].getMinConductivity()){
-            if(!addFertilizer(10)){
+            if(!addFertilizer(20)){
               Serial.println("adding Fertilizer failed!");
             }
           }

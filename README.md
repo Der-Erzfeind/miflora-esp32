@@ -13,38 +13,36 @@ Das Basisprojekt von @RaymondMouthaan wurde wie folgt verändert:
 - Dynamische Zuweisung der Elemente der Elemente der Sensor Klasse
 - Bezug der Parameter der Sensor Klasse vom Server über MQTT
 - callback() Funktion zum Parsen der erhaltenen Parameter hinzugefügt
-- MQTT Topics für Kommunikation mit Server geändert
+- MQTT Topics für Kommunikation mit Server geändert und Telegramme angepasst
 - Klasse Box mit Elementen für Füllstände hinzugefügt
-- control.cpp mit Funktionen zum           hinzugefügt
-- control.h 
-- ph_sensor.cpp und ph_sensor.h
+- control.cpp mit Funktionen zum Ansteuern der Pumpen und Sensoren hinzugefügt
+- control.h mit Definitionen der Sensor Pins und UART Commands
+- statische IP-Adressen Zuweisung für Verbindung mit Hotspot des Raspberry PI
 
-__Note : tested with a maximum of 8 Miflora sensors configured, however the ESP32 for some unknown reason get's stuck sometimes. With 4 Miflora sensors configured the ESP32 looks stable and therefore it's advisable to configure a maximum of 4 Miflora sensors per ESP32.__
+__Beachte : Projekt befindet sich im Prototyp Stadium, es können Fehler auftreten. Weitere Features, wie eine Notfallabschaltung und Fehlerbehandlung werden noch hinzugefügt__
 
-## Technical Requirements
+## Technische Voraussetzungen
 
 Hardware:
-- ESP32 device ([ESP32 at AliExpress](https://nl.aliexpress.com/wholesale?catId=0&initiative_id=SB_20200408062838&SearchText=MH-ET+Live+ESP32))
-- Xiaomi Flora Plant Sensor (firmware revision >= 2.6.6) ([Xiaomi flora at AliExpress](https://nl.aliexpress.com/wholesale?catId=0&initiative_id=SB_20200408063038&SearchText=xiaomi+flora))
+- ESP32 ([ESP32 auf AliExpress](https://nl.aliexpress.com/wholesale?catId=0&initiative_id=SB_20200408062838&SearchText=MH-ET+Live+ESP32))
+- Xiaomi Flora Plant Sensor (firmware revision >= 2.6.6) ([Xiaomi flora auf AliExpress](https://nl.aliexpress.com/wholesale?catId=0&initiative_id=SB_20200408063038&SearchText=xiaomi+flora))
 
 Software:
-- MQTT broker (e.g. [Mosquitto](https://mosquitto.org))
+- MQTT broker (z.B. [Mosquitto](https://mosquitto.org))
 
-## Quick Setup Instructions
+## Benutzungsanleitung
 
-Assumed you are familiar with [Visual Studo Code](https://code.visualstudio.com) and [PlatformIO](https://platformio.org). 
+Es werden Kenntnisse in der Nutzung von [Visual Studo Code](https://code.visualstudio.com) und [PlatformIO](https://platformio.org) angenommen. 
 
-1) Open the project in Visual Studio Code with PlatformIO installed
-2) Copy `example/config.h.example` to `include/config.h` and update settings according to your environment:
-    - MAC address(es), location(s), plant id(s) and min and max values of your Xiaomi Flora Plant sensor(s)
-    - Device id
+1) Öffnen Sie das Projekt in Visual Studio Code mit PlatformIO installiert.
+2) Kopieren Sie `example/config.h.example` nach `include/config.h` und passen Sie folgende Einstellungen für Ihr Netzwerk an:
     - WLAN Settings
     - MQTT Settings
-3) Modify platform.ini according to your environment:
+3) passen Sie platform.ini für Ihre Geräte an:
     - upload_port
     - monitor_port
 
-## Measuring Interval
+## Mess- und Regelungszyklus
 
 The ESP32 will perform a single connection attempt to the Xiaomi Mi Plant sensor, read the sensor data & push it to the MQTT server. The ESP32 will enter deep sleep mode after all sensors have been read and sleep for n minutes before repeating the exercise...
 Battery level is read every nth wakeup.
@@ -84,28 +82,6 @@ Example plain text payload:
 offline
 ```
 
-#### Status
-
-The subtopic `/device/status` is used to publish payload related to ESP32 (WiFi) status.
-
-Topic format: `<base_topic>/<device_id>/device/status`
-
-Example json payload:
-```
-{
-    "id": "esp32-1",
-    "ipaddress": "10.40.1.1",
-    "mac": "24:62:AB:CA:F6:40",
-    "channel": 10,
-    "rssi": -51
-}
-```
-
- - `id` - the id of the ESP32 as defined in `config.h`
- - `ipaddress` - the ip address of the ESP32 given by the DHCP server
- - `mac` - the MAC address of the ESP32
- - `channel` - the channel of the WiFi network
- - `rssi` - the WiFi Received Signal Strength Indicator
 
 ### Sensor topic
 

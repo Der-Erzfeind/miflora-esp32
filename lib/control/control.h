@@ -10,6 +10,7 @@
     #define PIN_US_FERTILIZER_ECHO 25
     #define PIN_US_ACID_TRIGGER 27
     #define PIN_US_ACID_ECHO 26
+    #define PIN_PH_PO 14
 
 
 
@@ -41,6 +42,9 @@
     void emergency_shutdown();
     void initHardware();
     float readUltraSonic(int trigger_pin, int echo_pin);
+    void bubbleSort(int arr[], int n);
+    float findMedian(int arr[], int n);
+    float read_PH();
     bool addWater(int ml);
     bool addFertilizer(int ml);
     bool correctPH(float ph);

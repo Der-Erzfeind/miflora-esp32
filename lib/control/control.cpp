@@ -1,5 +1,4 @@
 #include "control.h"
-#include "ph_sensor.h"
 
 void emergency_shutdown(){
     digitalWrite(PIN_ARDUINO_PWR, LOW);
@@ -40,6 +39,57 @@ float readUltraSonic(int trigger_pin, int echo_pin) {
     return distance;
 }
 
+
+void bubbleSort(int arr[], int n) {
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
+                // Tausche arr[j] und arr[j+1]
+                int temp = arr[j];
+                arr[j] = arr[j + 1];
+                arr[j + 1] = temp;
+            }
+        }
+    }
+}
+
+float findMedian(int arr[], int n) {
+    if (n % 2 == 0) {
+        // Wenn n gerade ist, den Durchschnitt der beiden mittleren Werte berechnen
+        return (arr[n / 2 - 1] + arr[n / 2]) / 2.0;
+    } else {
+        // Wenn n ungerade ist, den mittleren Wert zurückgeben
+        return arr[n / 2];
+    }
+}
+
+float read_PH()
+{
+  float calibration_value = 0.15;
+  float voltage, pH;
+  int buffer_arr[9];
+  
+  for(int i=0;i<9;i++)
+  {
+    buffer_arr[i]=analogRead(PIN_PH_PO);
+    delay(30);
+  }
+
+  bubbleSort(buffer_arr, 9);
+
+  float median = findMedian(buffer_arr, 9);
+
+  voltage = median * (3.0 / 4095.0) + calibration_value;
+  // Berechnung PH
+//   pH = 7 + (voltage-1.5)*(4-7)/(1.7-1.5);
+  
+  pH = (0.07 * 7 - voltage + 1.5)/0.07;
+  Serial.printf("ph is %f\n", pH);
+
+  return pH;
+}
+
+
 bool addWater(int ml){
     Serial.printf("adding %dml of water\n", ml);
     Serial.println(CMD_PUMP_WATER_ON);
@@ -79,9 +129,10 @@ bool addFertilizer(int ml){
 bool correctPH(float ph){
     Serial.println("reading PH from Sensor");
     //int ml = ph * C_PH_VOL;
-    int ml = 10;
+    int ml = 20;
     float curr_ph;
     for(int i=0; i<=5; i++){
+        delay(1000 * 60 * 10);
         curr_ph = read_PH();
         if(curr_ph <= ph) 
             break;
@@ -98,7 +149,6 @@ bool correctPH(float ph){
             emergency_shutdown();
             return false;
         } */
-        delay(1000 * 10);
     }
     return true;
 }
