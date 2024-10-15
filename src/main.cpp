@@ -647,7 +647,7 @@ void setup()
       if (processFloraDevice(readBattery, retryCount, sensorJson, sensorArray[i]))
       {
 
-        Serial.printf("MinMoist: %d \n", sensorArray[i].getMinMoisture());
+/*         Serial.printf("MinMoist: %d \n", sensorArray[i].getMinMoisture());
         Serial.printf("MaxMoist: %d \n", sensorArray[i].getMaxMoisture());
         Serial.printf("MinCond: %d \n", sensorArray[i].getMinConductivity());
         Serial.printf("MaxCond: %d \n", sensorArray[i].getMaxConductivity());
@@ -658,7 +658,7 @@ void setup()
         Serial.printf("moisture: %d \n", sensorArray[i].getmoisture());
         Serial.printf("light: %d \n", sensorArray[i].getlight());
         Serial.printf("conductivity: %d \n", sensorArray[i].getconductivity());
-        Serial.printf("battery: %d \n", sensorArray[i].getbattery());
+        Serial.printf("battery: %d \n", sensorArray[i].getbattery()); */
 
         
         if(sensorArray[i].getmoisture() <= sensorArray[i].getMinMoisture()){
